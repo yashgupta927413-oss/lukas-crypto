@@ -21,6 +21,8 @@ import {
   Search,
   Check,
   X,
+  Mail,
+  Send,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -28,7 +30,7 @@ export default function AdminPage() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<
-    "CONFIG" | "TIERS" | "YIELD" | "USERS" | "AUDIT" | "QUEUE"
+    "CONFIG" | "TIERS" | "YIELD" | "USERS" | "AUDIT" | "QUEUE" | "SMTP"
   >("CONFIG");
 
   const [adminData, setAdminData] = useState<any>({
@@ -69,6 +71,18 @@ export default function AdminPage() {
   );
   const [newWalletBalance, setNewWalletBalance] = useState<string>("");
 
+  // SMTP Config State
+  const [smtpForm, setSmtpForm] = useState({
+    smtpHost: "smtp.mail.me.com",
+    smtpPort: 587,
+    smtpUser: "",
+    smtpPass: "",
+    smtpFromEmail: "",
+    smtpFromName: "Lukas Crypto Management",
+    smtpEnabled: false,
+  });
+  const [testEmailAddr, setTestEmailAddr] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -93,6 +107,15 @@ export default function AdminPage() {
             maxBotDeposit: data.config.maxBotDeposit,
             binaryOptionWinRate: data.config.binaryOptionWinRate,
             referralBonusPercent: data.config.referralBonusPercent,
+          });
+          setSmtpForm({
+            smtpHost: data.config.smtpHost || "smtp.mail.me.com",
+            smtpPort: data.config.smtpPort || 587,
+            smtpUser: data.config.smtpUser || "",
+            smtpPass: data.config.smtpPass || "",
+            smtpFromEmail: data.config.smtpFromEmail || "",
+            smtpFromName: data.config.smtpFromName || "Lukas Crypto Management",
+            smtpEnabled: data.config.smtpEnabled || false,
           });
         }
       }
@@ -251,6 +274,49 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpdateSmtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "UPDATE_SMTP", data: smtpForm }),
+      });
+      if (!res.ok) throw new Error("SMTP config update failed");
+      setMsg({ type: "success", text: "SMTP configuration saved successfully!" });
+      fetchAdminData();
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailAddr) {
+      setMsg({ type: "error", text: "Enter a test email address" });
+      return;
+    }
+    setMsg(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "SEND_TEST_EMAIL", email: testEmailAddr }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Test email failed");
+      setMsg({ type: "success", text: `Test email sent to ${testEmailAddr}!` });
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredUsers = adminData.users.filter((u: any) =>
     u.email.toLowerCase().includes(userSearch.toLowerCase())
   );
@@ -304,6 +370,7 @@ export default function AdminPage() {
             { id: "USERS", name: "User Wallets", icon: Users },
             { id: "AUDIT", name: "Options Audit", icon: Clock },
             { id: "QUEUE", name: "Payout Queue", icon: DollarSign },
+            { id: "SMTP", name: "Email / SMTP", icon: Mail },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -672,7 +739,6 @@ export default function AdminPage() {
             )}
           </div>
         )}
-      </main>
 
       {/* ADJUST BALANCE MODAL */}
       {adjustingUser && (
@@ -731,6 +797,81 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+        {/* MODULE 7: SMTP / EMAIL CONFIG */}
+        {activeTab === "SMTP" && (
+          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Mail className="w-5 h-5 text-sky-400" />
+                iCloud SMTP Email Configuration
+              </h2>
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${smtpForm.smtpEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-slate-800 text-slate-500 border-slate-700"}`}>
+                {smtpForm.smtpEnabled ? "● ENABLED" : "○ DISABLED"}
+              </span>
+            </div>
+
+            <div className="p-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-xs text-sky-300">
+              <strong>iCloud Setup:</strong> Go to <a href="https://appleid.apple.com/account/manage" target="_blank" rel="noopener" className="underline font-bold">appleid.apple.com</a> → Sign-In & Security → App-Specific Passwords → Generate one named &quot;Lukas Crypto&quot;.
+            </div>
+
+            <form onSubmit={handleUpdateSmtp} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">SMTP Host</label>
+                  <input type="text" value={smtpForm.smtpHost} onChange={(e) => setSmtpForm({ ...smtpForm, smtpHost: e.target.value })} placeholder="smtp.mail.me.com" className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">SMTP Port</label>
+                  <input type="number" value={smtpForm.smtpPort} onChange={(e) => setSmtpForm({ ...smtpForm, smtpPort: parseInt(e.target.value) })} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">iCloud Email (Login)</label>
+                  <input type="email" value={smtpForm.smtpUser} onChange={(e) => setSmtpForm({ ...smtpForm, smtpUser: e.target.value })} placeholder="you@icloud.com" className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">App-Specific Password</label>
+                  <input type="password" value={smtpForm.smtpPass} onChange={(e) => setSmtpForm({ ...smtpForm, smtpPass: e.target.value })} placeholder="xxxx-xxxx-xxxx-xxxx" className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Sender Email (From)</label>
+                  <input type="email" value={smtpForm.smtpFromEmail} onChange={(e) => setSmtpForm({ ...smtpForm, smtpFromEmail: e.target.value })} placeholder="noreply@icloud.com" className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Sender Display Name</label>
+                  <input type="text" value={smtpForm.smtpFromName} onChange={(e) => setSmtpForm({ ...smtpForm, smtpFromName: e.target.value })} placeholder="Lukas Crypto Management" className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-sky-500" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                <button type="button" onClick={() => setSmtpForm({ ...smtpForm, smtpEnabled: !smtpForm.smtpEnabled })} className={`w-12 h-6 rounded-full transition-all relative ${smtpForm.smtpEnabled ? "bg-emerald-500" : "bg-slate-700"}`}>
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${smtpForm.smtpEnabled ? "left-6" : "left-0.5"}`}></span>
+                </button>
+                <span className="text-xs font-bold text-slate-300">Enable email notifications (Welcome, Deposit, Withdrawal, Bot Activation)</span>
+              </div>
+
+              <button type="submit" disabled={loading} className="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-sky-500/20 disabled:opacity-50">
+                {loading ? "Saving..." : "Save SMTP Configuration"}
+              </button>
+            </form>
+
+            {/* Test Email */}
+            <div className="pt-4 border-t border-slate-800 space-y-3">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Send className="w-4 h-4 text-amber-400" />
+                Send Test Email
+              </h3>
+              <div className="flex gap-2">
+                <input type="email" value={testEmailAddr} onChange={(e) => setTestEmailAddr(e.target.value)} placeholder="test@example.com" className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-sky-500" />
+                <button onClick={handleSendTestEmail} disabled={loading} className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20 disabled:opacity-50 flex items-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Send Test
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

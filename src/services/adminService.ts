@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendDepositConfirmedEmail, sendWithdrawalProcessedEmail } from "@/services/emailService";
 
 export async function updateGlobalConfigData(data: {
   trialCreditAmount?: number;
@@ -17,6 +18,39 @@ export async function updateGlobalConfigData(data: {
       maxBotDeposit: data.maxBotDeposit ?? 10000,
       binaryOptionWinRate: data.binaryOptionWinRate ?? 75,
       referralBonusPercent: data.referralBonusPercent ?? 5,
+    },
+  });
+}
+
+export async function updateSmtpConfig(data: {
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass: string;
+  smtpFromEmail: string;
+  smtpFromName: string;
+  smtpEnabled: boolean;
+}) {
+  return await prisma.globalConfig.upsert({
+    where: { id: "default" },
+    update: {
+      smtpHost: data.smtpHost,
+      smtpPort: data.smtpPort,
+      smtpUser: data.smtpUser,
+      smtpPass: data.smtpPass,
+      smtpFromEmail: data.smtpFromEmail,
+      smtpFromName: data.smtpFromName,
+      smtpEnabled: data.smtpEnabled,
+    },
+    create: {
+      id: "default",
+      smtpHost: data.smtpHost,
+      smtpPort: data.smtpPort,
+      smtpUser: data.smtpUser,
+      smtpPass: data.smtpPass,
+      smtpFromEmail: data.smtpFromEmail,
+      smtpFromName: data.smtpFromName,
+      smtpEnabled: data.smtpEnabled,
     },
   });
 }
@@ -146,6 +180,7 @@ export async function processTransactionApproval(transactionId: string, action: 
   return await prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.findUnique({
       where: { id: transactionId },
+      include: { user: { select: { email: true } } },
     });
 
     if (!transaction || transaction.status !== "PENDING") {
@@ -163,8 +198,9 @@ export async function processTransactionApproval(transactionId: string, action: 
           where: { userId: transaction.userId },
           data: { holdingBalance: { increment: transaction.amount } },
         });
+        // Send deposit confirmed email (non-blocking)
+        sendDepositConfirmedEmail(transaction.user.email, Number(transaction.amount).toFixed(2)).catch(() => {});
       }
-      // For withdrawal, amount was already deducted from holdingBalance upon request
     } else {
       await tx.transaction.update({
         where: { id: transactionId },
@@ -178,6 +214,12 @@ export async function processTransactionApproval(transactionId: string, action: 
           data: { holdingBalance: { increment: transaction.amount } },
         });
       }
+    }
+
+    // Send withdrawal notification email (non-blocking)
+    if (transaction.type === "WITHDRAWAL") {
+      const status = action === "APPROVE" ? "COMPLETED" : "REJECTED";
+      sendWithdrawalProcessedEmail(transaction.user.email, Number(transaction.amount).toFixed(2), status).catch(() => {});
     }
 
     return { success: true };

@@ -10,9 +10,11 @@ import {
   adminAdjustWalletBalance,
   getPendingTransactions,
   processTransactionApproval,
+  updateSmtpConfig,
 } from "@/services/adminService";
 import { injectDailyYield, getBotTiers, getGlobalConfig } from "@/services/botService";
 import { getAllOptionTrades } from "@/services/optionsService";
+import { sendTestEmail } from "@/services/emailService";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -74,6 +76,12 @@ export async function POST(req: Request) {
     } else if (action === "PROCESS_TRANSACTION") {
       const result = await processTransactionApproval(body.transactionId, body.decision);
       return NextResponse.json(result);
+    } else if (action === "UPDATE_SMTP") {
+      const result = await updateSmtpConfig(body.data);
+      return NextResponse.json(result);
+    } else if (action === "SEND_TEST_EMAIL") {
+      await sendTestEmail(body.email);
+      return NextResponse.json({ success: true, message: "Test email sent!" });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -81,3 +89,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
+

@@ -115,6 +115,14 @@ model GlobalConfig {
   maxBotDeposit          Decimal  @default(10000)
   binaryOptionWinRate    Decimal  @default(75) // 70-80%
   referralBonusPercent   Decimal  @default(5)
+  // SMTP / Email Config
+  smtpHost               String   @default("")
+  smtpPort               Int      @default(587)
+  smtpUser               String   @default("")
+  smtpPass               String   @default("")
+  smtpFromEmail          String   @default("")
+  smtpFromName           String   @default("Lukas Crypto Management")
+  smtpEnabled            Boolean  @default(false)
   updatedAt              DateTime @updatedAt
 }
 
