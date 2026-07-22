@@ -55,6 +55,28 @@ export async function updateSmtpConfig(data: {
   });
 }
 
+export async function updateGatewayConfig(data: {
+  nowpaymentsApiKey: string;
+  nowpaymentsIpnSecret: string;
+  paymentGatewayEnabled: boolean;
+}) {
+  return await prisma.globalConfig.upsert({
+    where: { id: "default" },
+    update: {
+      nowpaymentsApiKey: data.nowpaymentsApiKey,
+      nowpaymentsIpnSecret: data.nowpaymentsIpnSecret,
+      paymentGatewayEnabled: data.paymentGatewayEnabled,
+    },
+    create: {
+      id: "default",
+      nowpaymentsApiKey: data.nowpaymentsApiKey,
+      nowpaymentsIpnSecret: data.nowpaymentsIpnSecret,
+      paymentGatewayEnabled: data.paymentGatewayEnabled,
+    },
+  });
+}
+
+
 export async function createBotTierData(data: {
   name: string;
   durationDays: number;

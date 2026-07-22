@@ -138,18 +138,20 @@ export async function sendWelcomeEmail(userEmail: string) {
 }
 
 // ── DEPOSIT CONFIRMED EMAIL ──
-export async function sendDepositConfirmedEmail(userEmail: string, amount: string) {
+export async function sendDepositConfirmedEmail(userEmail: string, amount: string | number, transactionId?: string, asset?: string) {
   const config = await getSmtpConfig();
   if (!config) return;
+
+  const formattedAmount = typeof amount === "number" ? amount.toFixed(2) : amount;
 
   const body = `
     <h2 style="margin:0 0 16px;color:#ffffff;font-size:22px;font-weight:800;">Deposit Confirmed ✅</h2>
     <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 20px;">
-      Your deposit has been approved and credited to your Holding Wallet.
+      Your ${asset || "Crypto"} deposit has been automatically verified on-chain and credited to your Holding Wallet.
     </p>
     <div style="background-color:#0f172a;border:1px solid #334155;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center;">
       <span style="color:#64748b;font-size:12px;display:block;margin-bottom:4px;">Amount Credited</span>
-      <span style="color:#10b981;font-size:28px;font-weight:900;font-family:monospace;">+$${amount}</span>
+      <span style="color:#10b981;font-size:28px;font-weight:900;font-family:monospace;">+$${formattedAmount}</span>
     </div>
     <a href="https://lukas-crypto.vercel.app/dashboard" style="display:inline-block;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#0f172a;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:13px;font-weight:900;">
       VIEW WALLET →

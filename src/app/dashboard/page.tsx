@@ -45,6 +45,38 @@ export default function DashboardPage() {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
+  const [payCurrency, setPayCurrency] = useState("usdttrc20");
+  const [activePayment, setActivePayment] = useState<any>(null);
+  const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+
+  // Poll active payment status every 3 seconds if modal open
+  useEffect(() => {
+    if (!activePayment || activePayment.status === "COMPLETED") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/payments/status?transactionId=${activePayment.transactionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === "COMPLETED") {
+            setActivePayment((prev: any) => ({ ...prev, status: "COMPLETED" }));
+            setActionMsg(`🎉 Payment Confirmed! $${data.amount} credited to your Holding Wallet.`);
+            fetchData();
+            setTimeout(() => {
+              setShowDepositModal(false);
+              setActivePayment(null);
+              setActionMsg(null);
+            }, 4000);
+          }
+        }
+      } catch (e) {
+        console.error("Error polling payment status:", e);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [activePayment]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -84,22 +116,27 @@ export default function DashboardPage() {
     const amount = parseFloat(depositAmount);
     if (isNaN(amount) || amount <= 0) return;
 
+    setIsGeneratingPayment(true);
     try {
-      const res = await fetch("/api/user/wallet", {
+      const res = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "DEPOSIT", amount }),
+        body: JSON.stringify({ amount, payCurrency }),
       });
 
       if (res.ok) {
-        setActionMsg(`Successfully deposited $${amount.toFixed(2)} to Holding Wallet!`);
-        setDepositAmount("");
-        setShowDepositModal(false);
+        const data = await res.json();
+        setActivePayment(data);
         fetchData();
-        setTimeout(() => setActionMsg(null), 3000);
+      } else {
+        const err = await res.json();
+        setActionMsg(`Deposit Error: ${err.error}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setActionMsg("Failed to generate deposit address.");
+    } finally {
+      setIsGeneratingPayment(false);
     }
   };
 
@@ -519,85 +556,158 @@ export default function DashboardPage() {
       {/* Deposit Modal */}
       {showDepositModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
-          <div className="w-full max-w-lg glass-panel border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-5 animate-in zoom-in-95">
+          <div className="w-full max-w-lg glass-panel border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative space-y-5 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-xl font-black text-white">KYC-Free Crypto Deposit</h3>
+                <h3 className="text-xl font-black text-white">Automated Crypto Deposit</h3>
                 <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-mono">
                   100% NON-CUSTODIAL / NO KYC
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Deposit crypto from any private non-custodial wallet (Metamask, Trust Wallet, Ledger, Exodus, Telegram Wallet) directly into your Holding Wallet.
+                Send crypto from any non-custodial wallet. Your balance will update automatically upon on-chain network confirmation.
               </p>
             </div>
 
-            {/* Network Selector */}
-            <div className="grid grid-cols-3 gap-2 text-xs font-mono">
-              <div className="p-3 bg-slate-900 rounded-2xl border border-sky-500/30 text-center">
-                <span className="block font-bold text-white text-xs">USDT (TRC-20)</span>
-                <span className="text-[9px] text-sky-400">TRON Network</span>
-              </div>
-              <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-center">
-                <span className="block font-bold text-white text-xs">USDT (BEP-20)</span>
-                <span className="text-[9px] text-amber-400">BNB Smart Chain</span>
-              </div>
-              <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800 text-center">
-                <span className="block font-bold text-white text-xs">BTC (Native)</span>
-                <span className="text-[9px] text-emerald-400">Bitcoin Network</span>
-              </div>
-            </div>
+            {!activePayment ? (
+              <form onSubmit={handleDeposit} className="space-y-4">
+                {/* Network & Currency Selector */}
+                <div>
+                  <label className="text-xs text-slate-300 font-semibold block mb-2">Select Cryptocurrency Network</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+                    {[
+                      { id: "usdttrc20", label: "USDT (TRC-20)", network: "TRON", color: "text-sky-400" },
+                      { id: "usdtbep20", label: "USDT (BEP-20)", network: "BNB Chain", color: "text-amber-400" },
+                      { id: "btc", label: "BTC (Native)", network: "Bitcoin", color: "text-amber-500" },
+                      { id: "eth", label: "ETH (ERC-20)", network: "Ethereum", color: "text-purple-400" },
+                      { id: "sol", label: "SOL (Native)", network: "Solana", color: "text-emerald-400" },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setPayCurrency(item.id)}
+                        className={`p-3 rounded-2xl border text-center transition-all ${
+                          payCurrency === item.id
+                            ? "bg-slate-900 border-sky-500 shadow-md shadow-sky-500/10 ring-1 ring-sky-500"
+                            : "bg-slate-950 border-slate-800 opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        <span className="block font-bold text-white text-xs">{item.label}</span>
+                        <span className={`text-[9px] ${item.color}`}>{item.network}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            {/* Non-Custodial Deposit Address Box */}
-            <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-400 text-[11px]">
-                <span>Official Non-Custodial Deposit Address:</span>
-                <span className="text-emerald-400 font-bold">0% Processing Fee</span>
-              </div>
-              <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 font-mono text-sky-400 text-[11px] break-all flex items-center justify-between gap-2">
-                <span>TY9a1x7Z8bQxLp2mK9vR5wE4tY8uI0oP</span>
-                <button
-                  type="button"
-                  onClick={() => navigator.clipboard?.writeText("TY9a1x7Z8bQxLp2mK9vR5wE4tY8uI0oP")}
-                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] shrink-0 font-sans font-bold"
-                >
-                  Copy Address
-                </button>
-              </div>
-            </div>
+                <div>
+                  <label className="text-xs text-slate-300 font-semibold block mb-1">
+                    Deposit Amount ($ USD Equivalent)
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    placeholder="500.00"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono outline-none focus:border-sky-500 font-bold"
+                    required
+                  />
+                </div>
 
-            <form onSubmit={handleDeposit} className="space-y-4">
-              <div>
-                <label className="text-xs text-slate-300 font-semibold block mb-1">
-                  Deposit Amount ($ USD Equivalent)
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  placeholder="500.00"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono outline-none focus:border-sky-500 font-bold"
-                  required
-                />
-              </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDepositModal(false)}
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isGeneratingPayment}
+                    className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 uppercase tracking-wider disabled:opacity-50"
+                  >
+                    {isGeneratingPayment ? "Generating Address..." : "Generate Deposit Address"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Active Payment Invoice / Address View */
+              <div className="space-y-4 text-xs">
+                <div className="p-4 bg-slate-900 rounded-2xl border border-sky-500/30 text-center space-y-3">
+                  <div className="flex justify-between items-center text-slate-400 text-[11px]">
+                    <span>Asset: <strong className="text-white uppercase">{activePayment.payCurrency}</strong></span>
+                    <span>Amount: <strong className="text-emerald-400">${activePayment.amount}</strong></span>
+                  </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDepositModal(false)}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 uppercase tracking-wider"
-                >
-                  Confirm KYC-Free Deposit
-                </button>
+                  {/* QR Code */}
+                  <div className="flex justify-center my-2">
+                    <div className="p-2 bg-white rounded-2xl shadow-xl border border-slate-700">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${activePayment.payAddress}`}
+                        alt="Deposit Address QR"
+                        className="w-36 h-36 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">
+                      Send to this Deposit Address:
+                    </span>
+                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-sky-400 text-xs break-all flex items-center justify-between gap-2">
+                      <span>{activePayment.payAddress}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(activePayment.payAddress);
+                          setCopiedAddress(true);
+                          setTimeout(() => setCopiedAddress(false), 2000);
+                        }}
+                        className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg text-[10px] shrink-0 transition-all shadow"
+                      >
+                        {copiedAddress ? "Copied! ✓" : "Copy"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Status Indicator */}
+                  <div className="pt-2 flex items-center justify-center gap-2">
+                    {activePayment.status === "COMPLETED" ? (
+                      <span className="text-emerald-400 font-bold text-xs flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        PAYMENT CONFIRMED &amp; CREDITED
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 font-bold text-xs flex items-center gap-1.5 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        Waiting for on-chain network deposit...
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setActivePayment(null)}
+                    className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold"
+                  >
+                    ← Change Currency / Amount
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDepositModal(false);
+                      setActivePayment(null);
+                    }}
+                    className="flex-1 py-2.5 bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold"
+                  >
+                    Close Drawer
+                  </button>
+                </div>
               </div>
-            </form>
+            )}
           </div>
         </div>
       )}

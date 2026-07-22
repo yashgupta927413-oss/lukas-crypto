@@ -11,6 +11,7 @@ import {
   getPendingTransactions,
   processTransactionApproval,
   updateSmtpConfig,
+  updateGatewayConfig,
 } from "@/services/adminService";
 import { injectDailyYield, getBotTiers, getGlobalConfig } from "@/services/botService";
 import { getAllOptionTrades } from "@/services/optionsService";
@@ -78,6 +79,9 @@ export async function POST(req: Request) {
       return NextResponse.json(result);
     } else if (action === "UPDATE_SMTP") {
       const result = await updateSmtpConfig(body.data);
+      return NextResponse.json(result);
+    } else if (action === "UPDATE_GATEWAY") {
+      const result = await updateGatewayConfig(body.data);
       return NextResponse.json(result);
     } else if (action === "SEND_TEST_EMAIL") {
       await sendTestEmail(body.email);

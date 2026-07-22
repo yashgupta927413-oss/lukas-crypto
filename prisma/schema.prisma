@@ -123,6 +123,10 @@ model GlobalConfig {
   smtpFromEmail          String   @default("")
   smtpFromName           String   @default("Lukas Crypto Management")
   smtpEnabled            Boolean  @default(false)
+  // Payment Gateway Config
+  nowpaymentsApiKey      String   @default("")
+  nowpaymentsIpnSecret   String   @default("")
+  paymentGatewayEnabled  Boolean  @default(false)
   updatedAt              DateTime @updatedAt
 }
 
@@ -135,5 +139,8 @@ model Transaction {
   fromWallet  String?  // HOLDING, BOT, PERSONAL
   toWallet    String?  
   status      String   // PENDING, COMPLETED, REJECTED
+  paymentId   String?  // External Gateway Payment ID
+  payAddress  String?  // Generated On-Chain Deposit Address
+  payCurrency String?  // e.g. usdttrc20, btc, eth, sol
   createdAt   DateTime @default(now())
 }

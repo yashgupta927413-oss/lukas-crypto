@@ -23,6 +23,7 @@ import {
   X,
   Mail,
   Send,
+  CreditCard,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -30,7 +31,7 @@ export default function AdminPage() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<
-    "CONFIG" | "TIERS" | "YIELD" | "USERS" | "AUDIT" | "QUEUE" | "SMTP"
+    "CONFIG" | "TIERS" | "YIELD" | "USERS" | "AUDIT" | "QUEUE" | "SMTP" | "GATEWAY"
   >("CONFIG");
 
   const [adminData, setAdminData] = useState<any>({
@@ -94,6 +95,13 @@ export default function AdminPage() {
     }
   }, [session, status, router]);
 
+  // Payment Gateway Form State
+  const [gatewayForm, setGatewayForm] = useState({
+    nowpaymentsApiKey: "",
+    nowpaymentsIpnSecret: "",
+    paymentGatewayEnabled: false,
+  });
+
   const fetchAdminData = async () => {
     try {
       const res = await fetch("/api/admin");
@@ -116,6 +124,11 @@ export default function AdminPage() {
             smtpFromEmail: data.config.smtpFromEmail || "",
             smtpFromName: data.config.smtpFromName || "Lukas Crypto Management",
             smtpEnabled: data.config.smtpEnabled || false,
+          });
+          setGatewayForm({
+            nowpaymentsApiKey: data.config.nowpaymentsApiKey || "",
+            nowpaymentsIpnSecret: data.config.nowpaymentsIpnSecret || "",
+            paymentGatewayEnabled: data.config.paymentGatewayEnabled || false,
           });
         }
       }
@@ -308,8 +321,35 @@ export default function AdminPage() {
         body: JSON.stringify({ action: "SEND_TEST_EMAIL", email: testEmailAddr }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Test email failed");
-      setMsg({ type: "success", text: `Test email sent to ${testEmailAddr}!` });
+      if (res.ok) {
+        setMsg({ type: "success", text: "Test email dispatched successfully!" });
+      } else {
+        setMsg({ type: "error", text: data.error });
+      }
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateGateway = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "UPDATE_GATEWAY", data: gatewayForm }),
+      });
+      if (res.ok) {
+        setMsg({ type: "success", text: "Crypto Payment Gateway settings updated successfully!" });
+        fetchAdminData();
+      } else {
+        const err = await res.json();
+        setMsg({ type: "error", text: err.error });
+      }
     } catch (err: any) {
       setMsg({ type: "error", text: err.message });
     } finally {
@@ -371,6 +411,7 @@ export default function AdminPage() {
             { id: "AUDIT", name: "Options Audit", icon: Clock },
             { id: "QUEUE", name: "Payout Queue", icon: DollarSign },
             { id: "SMTP", name: "Email / SMTP", icon: Mail },
+            { id: "GATEWAY", name: "Crypto Gateway", icon: CreditCard },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -869,6 +910,78 @@ export default function AdminPage() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* MODULE 8: AUTOMATED CRYPTO PAYMENT GATEWAY CONFIG */}
+        {activeTab === "GATEWAY" && (
+          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-emerald-400" />
+                NOWPayments / API-Based Crypto Payment Gateway
+              </h2>
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${gatewayForm.paymentGatewayEnabled ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-slate-800 text-slate-500 border-slate-700"}`}>
+                {gatewayForm.paymentGatewayEnabled ? "● GATEWAY ACTIVE" : "○ GATEWAY INACTIVE"}
+              </span>
+            </div>
+
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-xs text-emerald-300 space-y-1">
+              <p className="font-bold">⚡ Zero-KYC Automated On-Chain Payment Processing:</p>
+              <p className="text-slate-300">
+                Register a free account on <a href="https://nowpayments.io" target="_blank" rel="noopener" className="underline font-bold text-emerald-400">nowpayments.io</a> (no merchant KYC required) to obtain your API Key &amp; IPN Secret.
+              </p>
+              <p className="text-slate-400 text-[11px]">
+                Callback Webhook URL: <code className="text-sky-300 font-mono">https://lukas-crypto.vercel.app/api/webhooks/payment</code>
+              </p>
+            </div>
+
+            <form onSubmit={handleUpdateGateway} className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">NOWPayments API Key</label>
+                  <input
+                    type="password"
+                    value={gatewayForm.nowpaymentsApiKey}
+                    onChange={(e) => setGatewayForm({ ...gatewayForm, nowpaymentsApiKey: e.target.value })}
+                    placeholder="e.g. 8A7B6C5-D4E3F21-..."
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">IPN Secret Key (Webhook Verification)</label>
+                  <input
+                    type="password"
+                    value={gatewayForm.nowpaymentsIpnSecret}
+                    onChange={(e) => setGatewayForm({ ...gatewayForm, nowpaymentsIpnSecret: e.target.value })}
+                    placeholder="Secret passphrase for signature verification"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-slate-900/80 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setGatewayForm({ ...gatewayForm, paymentGatewayEnabled: !gatewayForm.paymentGatewayEnabled })}
+                  className={`w-12 h-6 rounded-full transition-all relative ${gatewayForm.paymentGatewayEnabled ? "bg-emerald-500" : "bg-slate-700"}`}
+                >
+                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${gatewayForm.paymentGatewayEnabled ? "left-6" : "left-0.5"}`}></span>
+                </button>
+                <div>
+                  <span className="text-xs font-bold text-white block">Enable Automated Gateway Invoices</span>
+                  <span className="text-[11px] text-slate-400">When enabled, live unique payment addresses are fetched via API. If disabled, fallback non-custodial deposit addresses are shown.</span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 uppercase tracking-wider disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save Payment Gateway Settings"}
+              </button>
+            </form>
           </div>
         )}
       </main>
