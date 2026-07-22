@@ -1,0 +1,131 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BotStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TradeDirection {
+  CALL
+  PUT
+}
+
+enum TradeStatus {
+  PENDING
+  WIN
+  LOSS
+  DRAW
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String
+  role            Role           @default(USER)
+  referralCode    String         @unique
+  referredById    String?
+  referredBy      User?          @relation("Referrals", fields: [referredById], references: [id])
+  referrals       User[]         @relation("Referrals")
+  createdAt       DateTime       @default(now())
+
+  wallets         Wallet?
+  botContracts    BotContract[]
+  optionTrades    OptionTrade[]
+  transactions    Transaction[]
+}
+
+model Wallet {
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdingBalance          Decimal  @default(0.00000000)
+  botBalance              Decimal  @default(0.00000000)
+  personalTradingBalance Decimal  @default(0.00000000)
+  updatedAt               DateTime @updatedAt
+}
+
+model BotTier {
+  id             String        @id @default(uuid())
+  name           String        // e.g., "1 Month Plan"
+  durationDays   Int           // 30, 90, 180, 365
+  minRoiPercent  Decimal       // 10, 50, 150, 500
+  minDeposit     Decimal       @default(500)
+  maxDeposit     Decimal       @default(10000)
+  isActive       Boolean       @default(true)
+  contracts      BotContract[]
+}
+
+model BotContract {
+  id                String       @id @default(uuid())
+  userId            String
+  user              User         @relation(fields: [userId], references: [id])
+  tierId            String
+  tier              BotTier      @relation(fields: [tierId], references: [id])
+  principal         Decimal      // e.g., 500 (100 trial + 400 topup)
+  trialBonusUsed    Decimal      @default(0)
+  accumulatedProfit Decimal      @default(0)
+  status            BotStatus    @default(ACTIVE)
+  startDate         DateTime     @default(now())
+  endDate           DateTime
+  yieldLogs         BotYieldLog[]
+}
+
+model BotYieldLog {
+  id             String      @id @default(uuid())
+  contractId     String
+  contract       BotContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  yieldPercent   Decimal
+  profitAmount   Decimal
+  createdAt      DateTime    @default(now())
+}
+
+model OptionTrade {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  symbol           String         // e.g., "BTCUSDT"
+  direction        TradeDirection
+  stakeAmount      Decimal
+  payoutMultiplier Decimal        // e.g., 1.75 for 75% return
+  strikePrice      Decimal
+  settlementPrice  Decimal?
+  status           TradeStatus    @default(PENDING)
+  expiryTimeframe  String         // "5m", "15m", "30m", "1h", "4h", "daily"
+  expiresAt        DateTime
+  createdAt        DateTime       @default(now())
+}
+
+model GlobalConfig {
+  id                     String   @id @default("default")
+  trialCreditAmount      Decimal  @default(100)
+  minBotDeposit          Decimal  @default(500)
+  maxBotDeposit          Decimal  @default(10000)
+  binaryOptionWinRate    Decimal  @default(75) // 70-80%
+  referralBonusPercent   Decimal  @default(5)
+  updatedAt              DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // DEPOSIT, WITHDRAWAL, BOT_ACTIVATION, BOT_RELEASE, WALLET_TRANSFER
+  amount      Decimal
+  fromWallet  String?  // HOLDING, BOT, PERSONAL
+  toWallet    String?  
+  status      String   // PENDING, COMPLETED, REJECTED
+  createdAt   DateTime @default(now())
+}
