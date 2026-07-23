@@ -33,13 +33,30 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { symbol, direction, stakeAmount, expiryTimeframe, strikePrice } = body;
 
+    let parsedStrike = Number(strikePrice);
+    if (isNaN(parsedStrike) || parsedStrike <= 0) {
+      try {
+        const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+        if (priceRes.ok) {
+          const priceData = await priceRes.json();
+          parsedStrike = parseFloat(priceData.price);
+        }
+      } catch (e) {
+        console.error("Binance price lookup fallback failed", e);
+      }
+    }
+
+    if (isNaN(parsedStrike) || parsedStrike <= 0) {
+      return NextResponse.json({ error: "Invalid strike price" }, { status: 400 });
+    }
+
     const trade = await createOptionTrade(
       userId,
       symbol,
       direction,
       Number(stakeAmount),
       expiryTimeframe,
-      Number(strikePrice)
+      parsedStrike
     );
 
     return NextResponse.json(trade);

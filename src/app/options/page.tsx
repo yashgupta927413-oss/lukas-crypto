@@ -142,6 +142,7 @@ export default function OptionsPage() {
           direction,
           stakeAmount: stake,
           expiryTimeframe: timeframe,
+          strikePrice: livePrice,
         }),
       });
 

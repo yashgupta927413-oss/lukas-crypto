@@ -58,7 +58,7 @@ export async function createOptionTrade(
     throw new Error("Stake amount must be greater than zero");
   }
 
-  if (strikePrice <= 0) {
+  if (!strikePrice || isNaN(strikePrice) || strikePrice <= 0) {
     throw new Error("Invalid strike price");
   }
 
