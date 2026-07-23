@@ -2,6 +2,39 @@ import { prisma } from "@/lib/prisma";
 import { getGlobalConfig } from "./botService";
 
 export async function getUserOptionTrades(userId: string) {
+  // Auto-settle any expired pending trades for this user
+  const expired = await prisma.optionTrade.findMany({
+    where: {
+      userId,
+      status: "PENDING",
+      expiresAt: { lte: new Date() },
+    },
+  });
+
+  if (expired.length > 0) {
+    const symbols = Array.from(new Set(expired.map((t) => t.symbol)));
+    const prices: Record<string, number> = {};
+
+    for (const sym of symbols) {
+      try {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}`);
+        if (res.ok) {
+          const data = await res.json();
+          prices[sym] = parseFloat(data.price);
+        }
+      } catch (e) {
+        console.error("Auto settle price fetch error", e);
+      }
+    }
+
+    for (const trade of expired) {
+      const livePrice = prices[trade.symbol];
+      if (livePrice && livePrice > 0) {
+        await settleTrade(trade.id, livePrice);
+      }
+    }
+  }
+
   const trades = await prisma.optionTrade.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },

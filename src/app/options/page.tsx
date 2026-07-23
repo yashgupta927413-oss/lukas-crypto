@@ -110,6 +110,21 @@ export default function OptionsPage() {
     return () => clearInterval(interval);
   }, [session]);
 
+  // Auto trigger settlement when expired trades exist
+  useEffect(() => {
+    const expiredPending = trades.find(
+      (t) => t.status === "PENDING" && new Date(t.expiresAt).getTime() <= nowTime
+    );
+
+    if (expiredPending && livePrice > 0) {
+      fetch("/api/options", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ symbolPrices: { [expiredPending.symbol]: livePrice } }),
+      }).then(() => fetchTradesAndWallet());
+    }
+  }, [nowTime, trades, livePrice]);
+
   const handleExecuteTrade = async (direction: "CALL" | "PUT") => {
     if (!session) {
       router.push("/login?callbackUrl=/options");
@@ -161,7 +176,7 @@ export default function OptionsPage() {
 
   const calculatedPayout = (parseFloat(stakeAmount) || 0) * (1 + winPayoutRate / 100);
 
-  // Helper to format remaining time
+  // Helper to calculate remaining time
   const getRemainingSec = (expiresAt: string | Date) => {
     const diffMs = new Date(expiresAt).getTime() - nowTime;
     return Math.max(0, Math.floor(diffMs / 1000));
@@ -175,7 +190,22 @@ export default function OptionsPage() {
     return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
-  // Find active pending trade
+  // Helper to determine live PnL status for pending trades
+  const getTradeLiveStatus = (trade: any) => {
+    const strike = Number(trade.strikePrice);
+    if (livePrice === strike) return { label: "STRIKE MATCH", color: "text-[#38bdf8] bg-[#38bdf8]/10 border-[#38bdf8]/30" };
+    if (trade.direction === "CALL") {
+      return livePrice > strike
+        ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
+        : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
+    } else {
+      return livePrice < strike
+        ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
+        : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
+    }
+  };
+
+  // Active pending trades
   const activePendingTrades = trades.filter((t) => t.status === "PENDING");
   const latestPendingTrade = activePendingTrades[0];
 
@@ -218,29 +248,35 @@ export default function OptionsPage() {
           </div>
         </div>
 
-        {/* Live Active Trade Countdown Banner */}
+        {/* Live Active Trade Countdown & Real-Time PnL Status Banner */}
         {latestPendingTrade && (
-          <div className="bg-[#181a20] border border-[#f0b90b]/40 rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="bg-[#181a20] border border-[#2b313a] rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 font-bold">
                 <Timer className="w-4 h-4 animate-spin" />
                 <span>POSITION ACTIVE</span>
               </div>
+
               <span className="font-bold text-white">
                 {latestPendingTrade.symbol} {latestPendingTrade.direction} @ ${Number(latestPendingTrade.strikePrice).toFixed(2)}
+              </span>
+
+              {/* Real-time Status Badge (Green / Red / Blue) */}
+              <span className={`px-2.5 py-1 rounded border font-bold text-[11px] ${getTradeLiveStatus(latestPendingTrade).color}`}>
+                {getTradeLiveStatus(latestPendingTrade).label}
               </span>
             </div>
 
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className="text-[#848e9c] font-sans">Time Remaining:</span>
+                <span className="text-[#848e9c] font-sans">Countdown:</span>
                 <span className="text-[#f0b90b] font-bold text-sm bg-[#0b0e11] px-3 py-1 rounded border border-[#2b313a]">
                   ⏱️ {formatTimer(latestPendingTrade.expiresAt)}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[#848e9c] font-sans">Current Price:</span>
+                <span className="text-[#848e9c] font-sans">Live Spot:</span>
                 <span className="text-white font-bold">${livePrice.toFixed(2)}</span>
               </div>
             </div>
@@ -392,7 +428,7 @@ export default function OptionsPage() {
                     <th className="p-2.5">Stake</th>
                     <th className="p-2.5">Strike Price</th>
                     <th className="p-2.5">Settlement Price</th>
-                    <th className="p-2.5">Countdown / Expiry</th>
+                    <th className="p-2.5">Live Status / Countdown</th>
                     <th className="p-2.5">Payout</th>
                     <th className="p-2.5">Status</th>
                   </tr>
@@ -402,6 +438,7 @@ export default function OptionsPage() {
                     const isPending = trade.status === "PENDING";
                     const isWin = trade.status === "WIN";
                     const isLoss = trade.status === "LOSS";
+                    const liveStatus = getTradeLiveStatus(trade);
 
                     return (
                       <tr key={trade.id} className="hover:bg-[#1e2329] transition-colors">
@@ -420,13 +457,18 @@ export default function OptionsPage() {
                         <td className="p-2.5">${Number(trade.stakeAmount).toFixed(2)}</td>
                         <td className="p-2.5">${Number(trade.strikePrice).toFixed(2)}</td>
                         <td className="p-2.5">
-                          {trade.settlementPrice ? `$${Number(trade.settlementPrice).toFixed(2)}` : "—"}
+                          {trade.settlementPrice ? `$${Number(trade.settlementPrice).toFixed(2)}` : `$${livePrice.toFixed(2)}`}
                         </td>
                         <td className="p-2.5">
                           {isPending ? (
-                            <span className="text-[#f0b90b] font-bold bg-[#f0b90b]/10 px-2 py-0.5 rounded border border-[#f0b90b]/30">
-                              ⏱️ {formatTimer(trade.expiresAt)}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] border ${liveStatus.color}`}>
+                                {liveStatus.label}
+                              </span>
+                              <span className="text-[#f0b90b] font-bold">
+                                ⏱️ {formatTimer(trade.expiresAt)}
+                              </span>
+                            </div>
                           ) : (
                             <span className="text-[#848e9c]">Settled</span>
                           )}
@@ -447,7 +489,7 @@ export default function OptionsPage() {
                                 ? "bg-[#0ecb81]/10 text-[#0ecb81]"
                                 : isLoss
                                 ? "bg-[#f6465d]/10 text-[#f6465d]"
-                                : "bg-[#f0b90b]/10 text-[#f0b90b] animate-pulse"
+                                : "bg-[#f0b90b]/10 text-[#f0b90b]"
                             }`}
                           >
                             {trade.status}
