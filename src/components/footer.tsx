@@ -1,178 +1,63 @@
-"use client";
-
 import Link from "next/link";
-import { Bot, ShieldCheck, Lock, Zap, Gift, Coins, ChevronRight } from "lucide-react";
+import { ShieldCheck, Lock, Globe } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-slate-800/80 text-slate-400 text-xs font-sans relative z-10 overflow-hidden">
-      {/* Glow Effects */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12 relative z-10">
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          {/* Brand Column */}
-          <div className="lg:col-span-2 space-y-5">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-105 transition-transform">
-                <Bot className="w-6 h-6 text-white" />
+    <footer className="w-full bg-[#07090f] border-t border-[#1e2638] text-slate-400 text-xs py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand Col */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#192233] border border-[#2b374e] flex items-center justify-center text-[#f0b90b] font-black">
+                L
               </div>
-              <div>
-                <span className="text-xl font-black tracking-tight text-white">
-                  LUKAS<span className="text-sky-400"> CRYPTO</span>
-                </span>
-                <span className="block text-[9px] text-sky-400 font-mono tracking-widest uppercase font-bold">
-                  MANAGEMENT PLATFORM
-                </span>
-              </div>
-            </Link>
-
-            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              Next-generation quantitative AI investment bots & 1m/5m binary options terminal. Powered by live Binance WebSocket tick feeds and an isolated 3-Wallet security model.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-[11px]">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                BINANCE WEBSOCKET ONLINE
-              </span>
-              <span className="px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold">
-                100% NON-CUSTODIAL
-              </span>
+              <span className="text-white font-extrabold text-sm">LUKAS CRYPTO</span>
             </div>
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Institutional cryptocurrency options &amp; quantitative AI yield platform built on real-time Binance WebSocket price feeds.
+            </p>
           </div>
 
-          {/* Column 1: Platform Suite */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-sky-400" />
-              Trading Suite
-            </h4>
-            <ul className="space-y-2.5 font-medium">
-              <li>
-                <Link href="/dashboard" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-sky-400 transition" />
-                  Portfolio Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/bots" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-sky-400 transition" />
-                  AI Bot Investment Hub
-                </Link>
-              </li>
-              <li>
-                <Link href="/options" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-sky-400 transition" />
-                  1m & 5m Binary Options
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-sky-400 transition" />
-                  Admin Controls
-                </Link>
-              </li>
+          {/* Quick Links */}
+          <div className="space-y-2">
+            <span className="text-white font-bold block text-xs uppercase font-mono">Platform</span>
+            <ul className="space-y-1.5 text-slate-400">
+              <li><Link href="/" className="hover:text-white transition-colors">Markets Overview</Link></li>
+              <li><Link href="/options" className="hover:text-white transition-colors">1m &amp; 5m Options Desk</Link></li>
+              <li><Link href="/bots" className="hover:text-white transition-colors">AI Quant Bots</Link></li>
+              <li><Link href="/dashboard" className="hover:text-white transition-colors">Account Dashboard</Link></li>
             </ul>
           </div>
 
-          {/* Column 2: AI Strategies */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <Bot className="w-4 h-4 text-amber-400" />
-              AI Yield Bots
-            </h4>
-            <ul className="space-y-2.5 font-medium">
-              <li>
-                <Link href="/bots" className="hover:text-white transition flex items-center justify-between text-slate-400">
-                  <span>1 Month Bot</span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded">~0.50%/day</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/bots" className="hover:text-white transition flex items-center justify-between text-slate-400">
-                  <span>3 Month Maximizer</span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded">~0.61%/day</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/bots" className="hover:text-white transition flex items-center justify-between text-slate-400">
-                  <span>6 Month Pro</span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded">~0.72%/day</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/bots" className="hover:text-white transition flex items-center justify-between text-slate-400">
-                  <span>1 Year Elite</span>
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded">~0.88%/day</span>
-                </Link>
-              </li>
+          {/* Security */}
+          <div className="space-y-2">
+            <span className="text-white font-bold block text-xs uppercase font-mono">Security</span>
+            <ul className="space-y-1.5 text-slate-400">
+              <li><span className="text-slate-300">● Non-Custodial Deposits</span></li>
+              <li><span className="text-slate-300">● Isolated 3-Wallet Architecture</span></li>
+              <li><span className="text-slate-300">● 256-Bit SSL Encryption</span></li>
+              <li><span className="text-slate-300">● Instant On-Chain Webhooks</span></li>
             </ul>
           </div>
 
-          {/* Column 3: Legal & Support */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Legal & Support
-            </h4>
-            <ul className="space-y-2.5 font-medium">
-              <li>
-                <Link href="/privacy" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition" />
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition" />
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/risk-disclosure" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition" />
-                  Risk Disclosure
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition" />
-                  FAQ & Help Center
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-white transition flex items-center gap-1 group">
-                  <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition" />
-                  Contact Support
-                </Link>
-              </li>
+          {/* Legal */}
+          <div className="space-y-2">
+            <span className="text-white font-bold block text-xs uppercase font-mono">Legal &amp; Compliance</span>
+            <ul className="space-y-1.5 text-slate-400">
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link href="/risk-disclosure" className="hover:text-white transition-colors">Risk Disclosure</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Multi-Chain Badges Strip */}
-        <div className="p-4 bg-slate-900/70 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4 text-slate-400 font-mono text-[11px]">
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-amber-400" />
-            <span className="font-bold text-white font-sans">Supported Deposit Networks:</span>
+        <div className="pt-8 border-t border-[#1e2638] flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-slate-500 font-mono">
+          <div>© {new Date().getFullYear()} Lukas Crypto Management. All rights reserved.</div>
+          <div className="flex items-center gap-4">
+            <span>Trading involve risk. Past performance does not guarantee future results.</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-sky-400 font-bold">USDT (TRC-20)</span>
-            <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-amber-400 font-bold">USDT/USDC (BEP-20)</span>
-            <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-emerald-400 font-bold">BTC (Native)</span>
-            <span className="px-2.5 py-1 rounded bg-slate-950 border border-slate-800 text-purple-400 font-bold">USDT/USDC (ERC-20)</span>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="pt-6 border-t border-slate-900 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-slate-500 font-mono">
-          <p>© {new Date().getFullYear()} Lukas Crypto Management. All rights reserved.</p>
-          <p className="max-w-md text-center md:text-right text-[9px] text-slate-600">
-            Risk Warning: Trading binary options and cryptocurrency derivatives carries significant financial risk. Past performance does not guarantee future results.
-          </p>
         </div>
       </div>
     </footer>

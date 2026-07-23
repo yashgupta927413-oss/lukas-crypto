@@ -13,10 +13,11 @@ import {
   User,
   ChevronDown,
   ArrowRightLeft,
-  Coins,
   Globe,
   Menu,
   X,
+  PlusCircle,
+  BarChart2,
 } from "lucide-react";
 import WalletTransferModal from "./wallet-transfer-modal";
 
@@ -43,7 +44,6 @@ export default function Navbar() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -92,277 +92,218 @@ export default function Navbar() {
   }, [session]);
 
   const navLinks = [
-    { name: "Home", href: "/", icon: Globe },
+    { name: "Markets", href: "/", icon: BarChart2 },
+    { name: "Options Trading", href: "/options", icon: TrendingUp },
+    { name: "Quant AI Bots", href: "/bots", icon: Bot },
     { name: "Dashboard", href: "/dashboard", icon: Wallet },
-    { name: "AI Bots", href: "/bots", icon: Bot },
-    { name: "1m/5m Options", href: "/options", icon: TrendingUp },
   ];
 
-  if ((session?.user as any)?.role === "ADMIN") {
-    navLinks.push({ name: "Admin Panel", href: "/admin", icon: ShieldAlert });
-  }
-
-  const totalNetWorth =
-    wallets.holdingBalance + wallets.botBalance + wallets.personalTradingBalance;
+  const totalBalance =
+    Number(wallets.holdingBalance) +
+    Number(wallets.botBalance) +
+    Number(wallets.personalTradingBalance);
 
   return (
-    <>
-      {/* Top Ticker Bar */}
-      <div className="bg-slate-950/90 border-b border-slate-800/60 text-xs py-1.5 px-4 flex items-center overflow-x-auto whitespace-nowrap scrollbar-none gap-6 text-slate-300">
-        <div className="flex items-center gap-1.5 font-semibold text-sky-400">
-          <Coins className="w-3.5 h-3.5 animate-pulse" />
-          <span>BINANCE LIVE:</span>
-        </div>
-        {Object.entries(prices).map(([symbol, data]) => (
-          <div key={symbol} className="flex items-center gap-2 font-mono">
-            <span className="text-slate-400 font-sans">{symbol.replace("USDT", "")}/USDT</span>
-            <span className="font-semibold text-slate-100">${data.price.toLocaleString()}</span>
-            <span
-              className={`text-[10px] px-1 py-0.2 rounded font-bold ${
-                data.change24h >= 0
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-              }`}
-            >
-              {data.change24h >= 0 ? "+" : ""}
-              {data.change24h.toFixed(2)}%
-            </span>
+    <header className="sticky top-0 z-40 w-full border-b border-[#1e2638] bg-[#0b0e14]/95 backdrop-blur-md">
+      {/* Top Live Ticker Bar */}
+      <div className="border-b border-[#1e2638]/60 bg-[#07090f] text-[11px] font-mono py-1 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 overflow-x-auto scrollbar-none text-slate-400">
+          <div className="flex items-center gap-6 shrink-0">
+            {Object.entries(prices).map(([sym, val]) => (
+              <div key={sym} className="flex items-center gap-1.5">
+                <span className="font-sans font-semibold text-slate-300">{sym.replace("USDT", "")}</span>
+                <span className="text-slate-100 font-bold">${val.price.toLocaleString()}</span>
+                <span className={val.change24h >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"}>
+                  {val.change24h >= 0 ? "+" : ""}{val.change24h}%
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
+          <div className="hidden lg:flex items-center gap-4 text-slate-400 text-[10px] uppercase font-sans tracking-wider">
+            <span>● Binance Websocket Feed</span>
+            <span>● 0.00% Deposit Fee</span>
+          </div>
+        </div>
       </div>
 
       {/* Main Navbar */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-[#192233] border border-[#2b374e] flex items-center justify-center text-[#f0b90b] font-black text-lg transition-transform group-hover:scale-105">
+              L
             </div>
-            <div>
-              <span className="text-base font-black tracking-tight text-white">
-                LUKAS<span className="text-sky-400"> CRYPTO</span>
+            <div className="flex flex-col">
+              <span className="text-white font-extrabold text-base tracking-tight leading-none flex items-center gap-1">
+                LUKAS <span className="text-[#f0b90b]">CRYPTO</span>
               </span>
-              <span className="block text-[9px] text-sky-400 font-mono tracking-widest uppercase font-bold">
-                MANAGEMENT
+              <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase mt-0.5">
+                Institutional Platform
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
-              const Icon = link.icon;
               const isActive = pathname === link.href;
-              const targetHref =
-                !session && link.href === "/dashboard"
-                  ? "/login?callbackUrl=/dashboard"
-                  : link.href;
-
+              const Icon = link.icon;
               return (
                 <Link
                   key={link.href}
-                  href={targetHref}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  href={link.href}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-sky-500/10 text-sky-400 border border-sky-500/30 font-bold"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                      ? "bg-[#192233] text-white border border-[#2b374e]"
+                      : "text-slate-400 hover:text-white hover:bg-[#121722]"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  {link.name}
+                  <Icon className={`w-4 h-4 ${isActive ? "text-[#f0b90b]" : "text-slate-400"}`} />
+                  <span>{link.name}</span>
                 </Link>
               );
             })}
           </nav>
 
+          {/* User Account / Auth Actions */}
           <div className="flex items-center gap-3">
             {session ? (
               <div className="relative" ref={dropdownRef}>
+                {/* Wallet Balance Button */}
                 <button
                   onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
-                  className="flex items-center gap-2.5 bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-xl px-3 py-1.5 transition-all text-left"
+                  className="flex items-center gap-2.5 bg-[#121722] hover:bg-[#192233] border border-[#1e2638] hover:border-[#2b374e] px-3.5 py-2 rounded-xl text-xs transition-all"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400">
-                    <Wallet className="w-4 h-4" />
+                  <Wallet className="w-4 h-4 text-[#f0b90b]" />
+                  <div className="text-left font-mono">
+                    <span className="text-[10px] text-slate-400 block font-sans leading-none">Total Assets</span>
+                    <span className="text-white font-bold">${totalBalance.toFixed(2)}</span>
                   </div>
-                  <div className="hidden sm:block">
-                    <span className="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                      Total Net Worth
-                    </span>
-                    <span className="text-sm font-bold text-emerald-400 font-mono">
-                      ${totalNetWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
                 </button>
 
+                {/* Wallet Dropdown Menu */}
                 {isWalletDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-slate-950/98 border border-slate-800 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-2xl animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                      <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                        3-Wallet Balances
-                      </span>
-                      <button
-                        onClick={() => {
-                          setIsWalletDropdownOpen(false);
-                          setIsTransferModalOpen(true);
-                        }}
-                        className="flex items-center gap-1 text-xs text-sky-400 hover:text-sky-300 font-medium bg-sky-500/10 px-2 py-1 rounded-lg border border-sky-500/20"
+                  <div className="absolute right-0 mt-2 w-72 bg-[#121722] border border-[#1e2638] rounded-2xl p-4 shadow-2xl space-y-3 z-50 animate-in fade-in zoom-in-95">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#1e2638]">
+                      <div>
+                        <span className="text-[10px] text-slate-400 font-mono uppercase block">Logged in as</span>
+                        <span className="text-xs font-bold text-white truncate max-w-[180px] block">
+                          {session.user?.email}
+                        </span>
+                      </div>
+                      {(session.user as any)?.role === "ADMIN" && (
+                        <Link
+                          href="/admin"
+                          className="text-[10px] font-bold bg-[#f0b90b]/10 text-[#f0b90b] px-2 py-0.5 rounded border border-[#f0b90b]/30"
+                        >
+                          ADMIN
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Balance Breakdown */}
+                    <div className="space-y-2 text-xs font-mono">
+                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1e2638]">
+                        <span className="text-slate-400 font-sans">Holding Wallet</span>
+                        <span className="text-white font-bold">${Number(wallets.holdingBalance).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1e2638]">
+                        <span className="text-slate-400 font-sans">Bot Investment</span>
+                        <span className="text-[#f0b90b] font-bold">${Number(wallets.botBalance).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1e2638]">
+                        <span className="text-slate-400 font-sans">Options Trading</span>
+                        <span className="text-[#0ecb81] font-bold">${Number(wallets.personalTradingBalance).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    {/* Quick Transfer */}
+                    <button
+                      onClick={() => {
+                        setIsWalletDropdownOpen(false);
+                        setIsTransferModalOpen(true);
+                      }}
+                      className="w-full py-2 bg-[#192233] hover:bg-[#232c40] text-slate-200 rounded-xl text-xs font-bold border border-[#2b374e] flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5 text-[#f0b90b]" />
+                      Transfer Funds Between Wallets
+                    </button>
+
+                    <div className="pt-2 border-t border-[#1e2638] flex justify-between items-center">
+                      <Link
+                        href="/dashboard"
+                        className="text-xs text-[#38bdf8] hover:underline font-semibold"
+                        onClick={() => setIsWalletDropdownOpen(false)}
                       >
-                        <ArrowRightLeft className="w-3.5 h-3.5" />
-                        Transfer
-                      </button>
-                    </div>
-
-                    <div className="space-y-3 my-3">
-                      <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-medium text-slate-300 block">
-                            Holding Wallet
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            Deposits & Unencumbered Funds
-                          </span>
-                        </div>
-                        <span className="font-mono text-sm font-bold text-white">
-                          ${wallets.holdingBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs font-medium text-slate-300 block">
-                              Bot Trading Wallet
-                            </span>
-                            <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded font-bold">
-                              LOCKED
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400">
-                            Active AI Bot Principal + ROI
-                          </span>
-                        </div>
-                        <span className="font-mono text-sm font-bold text-amber-400">
-                          ${wallets.botBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-medium text-slate-300 block">
-                            Personal Trading Wallet
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            Dedicated to 1m/5m Options
-                          </span>
-                        </div>
-                        <span className="font-mono text-sm font-bold text-sky-400">
-                          ${wallets.personalTradingBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-1.5 text-slate-400 overflow-hidden text-ellipsis">
-                        <User className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate max-w-[150px]">{session.user?.email}</span>
-                      </div>
+                        Manage Account →
+                      </Link>
                       <button
-                        onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1 shrink-0"
+                        onClick={() => signOut()}
+                        className="text-xs text-[#f6465d] hover:underline font-semibold flex items-center gap-1"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        Logout
+                        Sign Out
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-3.5 py-1.5 text-sm font-medium text-slate-300 hover:text-white transition"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-[#121722] transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-1.5 text-sm font-medium bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl font-semibold shadow-lg shadow-sky-500/20 transition"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#f0b90b] text-[#0b0e14] hover:bg-[#d97706] transition-colors shadow-md"
                 >
-                  Get Started
+                  Open Account
                 </Link>
               </div>
             )}
 
-            {/* Mobile Menu Hamburger Toggle */}
+            {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-slate-300 hover:text-white rounded-xl bg-slate-900 border border-slate-800"
-              aria-label="Toggle navigation menu"
+              className="md:hidden p-2 text-slate-400 hover:text-white"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Dropdown Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl px-4 py-3 space-y-2 animate-in fade-in slide-in-from-top-2">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const isActive = pathname === link.href;
-              const targetHref =
-                !session && link.href === "/dashboard"
-                  ? "/login?callbackUrl=/dashboard"
-                  : link.href;
+      {/* Mobile Drawer Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-[#1e2638] bg-[#0b0e14] px-4 py-4 space-y-3">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-3 p-3 rounded-xl text-sm font-semibold ${
+                pathname === link.href ? "bg-[#192233] text-white" : "text-slate-400"
+              }`}
+            >
+              <link.icon className="w-5 h-5" />
+              <span>{link.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
-              return (
-                <Link
-                  key={link.href}
-                  href={targetHref}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                    isActive
-                      ? "bg-sky-500/10 text-sky-400 border border-sky-500/30 font-bold"
-                      : "text-slate-300 hover:bg-slate-900"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {link.name}
-                </Link>
-              );
-            })}
-
-            {!session && (
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="py-2 text-center text-xs font-bold text-slate-300 bg-slate-900 rounded-xl border border-slate-800"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="py-2 text-center text-xs font-bold text-slate-950 bg-sky-500 rounded-xl shadow-md"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
-      </header>
-
+      {/* Wallet Transfer Modal */}
       <WalletTransferModal
         isOpen={isTransferModalOpen}
         onClose={() => setIsTransferModalOpen(false)}
         wallets={wallets}
         onSuccess={fetchWallets}
       />
-    </>
+    </header>
   );
 }

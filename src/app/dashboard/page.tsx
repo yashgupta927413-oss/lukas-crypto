@@ -190,50 +190,50 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b0e14] text-slate-100 flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#121722] p-6 sm:p-8 rounded-2xl border border-[#1e2638]">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-wider">
-                VERIFIED ACCOUNT
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded bg-[#38bdf8]/10 text-[#38bdf8] border border-[#38bdf8]/30 uppercase font-mono tracking-wider">
+                ACCOUNT VERIFIED
               </span>
               <span className="text-xs text-slate-400 font-mono">Role: {(session?.user as any)?.role}</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Portfolio Control Center
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Portfolio Overview
             </h1>
             <p className="text-xs text-slate-400">
-              Isolated 3-Wallet Model with Real-Time AI Yields & 1-Minute Binary Options
+              Manage your 3-wallet balances, active AI Quant contracts, and options trades.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setShowDepositModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e14] font-bold text-xs rounded-xl transition shadow"
             >
               <PlusCircle className="w-4 h-4" />
-              Deposit Funds
+              <span>Deposit Crypto</span>
             </button>
 
             <button
               onClick={() => setShowWithdrawModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs rounded-xl border border-slate-700 transition"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#192233] hover:bg-[#232c40] text-slate-200 font-bold text-xs rounded-xl border border-[#2b374e] transition"
             >
               <MinusCircle className="w-4 h-4" />
-              Withdrawal
+              <span>Withdrawal</span>
             </button>
 
             <button
               onClick={() => setIsTransferModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-sky-500/20 transition"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e14] font-bold text-xs rounded-xl transition shadow"
             >
               <ArrowRightLeft className="w-4 h-4" />
-              Wallet Transfer
+              <span>Wallet Transfer</span>
             </button>
           </div>
         </div>

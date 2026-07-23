@@ -140,53 +140,52 @@ export default function BotsPage() {
   const hasUsedTrial = contracts.some((c) => c.trialBonusUsed > 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#0b0e14] text-slate-100 flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-xs font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>QUANTITATIVE AI ALGORITHMIC YIELD ENGINE</span>
+        <div className="bg-[#121722] p-6 sm:p-8 rounded-2xl border border-[#1e2638]">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 uppercase font-mono tracking-wider">
+                QUANTITATIVE VAULTS
+              </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              AI Bot Investment Hub
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              AI Quantitative Bot Vaults
             </h1>
-            <p className="text-sm text-slate-400 mt-2">
-              Commit funds to high-frequency algorithmic trading bots. Earn daily yields injected directly into your contract allocation.
+            <p className="text-xs text-slate-400 max-w-2xl">
+              Lock funds into automated quantitative trading strategies to earn daily compounding yields credited directly to your Bot balance.
             </p>
           </div>
         </div>
 
         {/* $100 Free Trial Credit Status Banner */}
-        <div className="glass-panel p-6 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-slate-900 to-sky-500/10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="bg-[#121722] p-6 rounded-2xl border border-[#1e2638] flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 shadow-lg shadow-emerald-500/10">
-              <Gift className="w-6 h-6 animate-bounce" />
+            <div className="w-10 h-10 rounded-xl bg-[#0ecb81]/10 border border-[#0ecb81]/30 flex items-center justify-center text-[#0ecb81] shrink-0 font-bold text-lg">
+              🎁
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">
-                  ${globalConfig.trialCreditAmount || 100} Free Trial Bonus Allocation
+                <h3 className="text-base font-bold text-white">
+                  ${globalConfig.trialCreditAmount || 100} Free Trial Bonus
                 </h3>
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                     hasUsedTrial
                       ? "bg-slate-800 text-slate-400 border border-slate-700"
-                      : "bg-emerald-500 text-slate-950 shadow-md"
+                      : "bg-[#0ecb81] text-[#0b0e14]"
                   }`}
                 >
-                  {hasUsedTrial ? "REDEEMED" : "AVAILABLE NOW"}
+                  {hasUsedTrial ? "REDEEMED" : "AVAILABLE"}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 {hasUsedTrial
-                  ? "You have already claimed your $100 free trial bonus on an active/completed contract."
-                  : "Combine your $100 Free Trial Credit with a minimum $400 top-up from Holding Wallet to reach the required $500 principal!"}
+                  ? "You have already claimed your $100 free trial bonus on a contract."
+                  : "Combine your $100 Free Trial Credit with a $400 top-up to activate the $500 minimum bot plan."}
               </p>
             </div>
           </div>

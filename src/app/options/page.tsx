@@ -14,8 +14,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Flame,
-  Lock,
+  Wallet,
+  ArrowRightLeft,
 } from "lucide-react";
+import WalletTransferModal from "@/components/wallet-transfer-modal";
 
 export default function OptionsPage() {
   const { data: session, status } = useSession();
@@ -26,7 +28,8 @@ export default function OptionsPage() {
   const [livePrice, setLivePrice] = useState<number>(94520.5);
 
   const [personalBalance, setPersonalBalance] = useState<number>(0);
-  const [stakeAmount, setStakeAmount] = useState<string>("50");
+  const [holdingBalance, setHoldingBalance] = useState<number>(0);
+  const [stakeAmount, setStakeAmount] = useState<string>("100");
   const [winPayoutRate, setWinPayoutRate] = useState<number>(75);
 
   const [trades, setTrades] = useState<any[]>([]);
@@ -34,6 +37,7 @@ export default function OptionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [nowTime, setNowTime] = useState<number>(Date.now());
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const assets = [
     { symbol: "BTCUSDT", name: "Bitcoin", icon: "₿" },
@@ -44,7 +48,7 @@ export default function OptionsPage() {
     { symbol: "BNBUSDT", name: "Binance Coin", icon: "Ƀ" },
   ];
 
-  const timeframes = ["1m", "5m", "15m", "30m", "1h", "4h", "daily"];
+  const timeframes = ["1m", "5m", "15m"];
 
   // Live timer tick for trade countdowns
   useEffect(() => {
@@ -87,13 +91,14 @@ export default function OptionsPage() {
 
       if (walletRes.ok) {
         const walletData = await walletRes.json();
-        setPersonalBalance(walletData.personalTradingBalance || 0);
+        setPersonalBalance(Number(walletData.personalTradingBalance || 0));
+        setHoldingBalance(Number(walletData.holdingBalance || 0));
       }
 
       if (botRes.ok) {
         const botData = await botRes.json();
         if (botData.globalConfig?.binaryOptionWinRate) {
-          setWinPayoutRate(botData.globalConfig.binaryOptionWinRate);
+          setWinPayoutRate(Number(botData.globalConfig.binaryOptionWinRate));
         }
       }
     } catch (e) {
@@ -102,44 +107,16 @@ export default function OptionsPage() {
   };
 
   useEffect(() => {
-    if (session) {
-      fetchTradesAndWallet();
-      const interval = setInterval(fetchTradesAndWallet, 3000);
-      return () => clearInterval(interval);
-    }
+    fetchTradesAndWallet();
+    const interval = setInterval(fetchTradesAndWallet, 3000);
+    return () => clearInterval(interval);
   }, [session]);
 
-  // Auto-settlement trigger on expired trades
-  useEffect(() => {
-    const settleWorker = async () => {
-      if (session && livePrice > 0) {
-        try {
-          await fetch("/api/options", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              symbolPrices: { [selectedAsset]: livePrice },
-            }),
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-
-    const interval = setInterval(settleWorker, 3000);
-    return () => clearInterval(interval);
-  }, [session, livePrice, selectedAsset]);
-
-  const handlePlaceTrade = async (direction: "CALL" | "PUT") => {
-    // REQUIRE LOGIN BEFORE PLACING BET
-    if (status !== "authenticated" || !session) {
+  const handleExecuteTrade = async (direction: "CALL" | "PUT") => {
+    if (!session) {
       router.push("/login?callbackUrl=/options");
       return;
     }
-
-    setError(null);
-    setSuccessMsg(null);
 
     const stake = parseFloat(stakeAmount);
     if (isNaN(stake) || stake <= 0) {
@@ -148,11 +125,14 @@ export default function OptionsPage() {
     }
 
     if (stake > personalBalance) {
-      setError(`Insufficient Personal Trading Balance ($${personalBalance.toFixed(2)})`);
+      setError(`Insufficient trading balance. Transfer funds to Personal Trading Wallet.`);
       return;
     }
 
+    setError(null);
+    setSuccessMsg(null);
     setLoading(true);
+
     try {
       const res = await fetch("/api/options", {
         method: "POST",
@@ -162,388 +142,277 @@ export default function OptionsPage() {
           direction,
           stakeAmount: stake,
           expiryTimeframe: timeframe,
-          strikePrice: livePrice,
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Trade execution failed");
-      }
 
-      setSuccessMsg(
-        `Binary Option ${direction} order executed @ strike $${livePrice.toLocaleString()}!`
-      );
-      fetchTradesAndWallet();
-      setTimeout(() => setSuccessMsg(null), 3500);
-    } catch (err: any) {
-      setError(err.message || "Failed to place trade");
+      if (res.ok) {
+        setSuccessMsg(`🚀 ${direction} Position Opened @ $${data.strikePrice}`);
+        fetchTradesAndWallet();
+      } else {
+        setError(data.error || "Failed to execute trade");
+      }
+    } catch (e: any) {
+      setError(e.message || "Error executing position");
     } finally {
       setLoading(false);
     }
   };
 
-  const setPercentageStake = (pct: number) => {
-    if (!session) {
-      router.push("/login?callbackUrl=/options");
-      return;
-    }
-    const val = (personalBalance * (pct / 100)).toFixed(2);
-    setStakeAmount(val);
-  };
+  const calculatedPayout = (parseFloat(stakeAmount) || 0) * (1 + winPayoutRate / 100);
 
-  const activePendingTrade = trades.find((t) => t.status === "PENDING" && t.symbol === selectedAsset);
-  const expectedPayout = (parseFloat(stakeAmount || "0") * (1 + winPayoutRate / 100)).toFixed(2);
-
-  const isPriceWinning =
-    activePendingTrade &&
-    ((activePendingTrade.direction === "CALL" && livePrice > activePendingTrade.strikePrice) ||
-      (activePendingTrade.direction === "PUT" && livePrice < activePendingTrade.strikePrice));
+  const activePendingTrade = trades.find(
+    (t) => t.status === "PENDING" && new Date(t.expiresAt).getTime() > nowTime
+  );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#0b0e14] text-slate-100 flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* ASSET SELECTOR & TIMEFRAMES */}
-        <div className="glass-panel p-4 rounded-3xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-            {assets.map((asset) => {
-              const isSelected = selectedAsset === asset.symbol;
-              return (
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Top Asset & Header Bar */}
+        <div className="bg-[#121722] border border-[#1e2638] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {/* Asset Selector */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+              {assets.map((asset) => (
                 <button
                   key={asset.symbol}
                   onClick={() => setSelectedAsset(asset.symbol)}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-2.5 ${
-                    isSelected
-                      ? "bg-gradient-to-r from-sky-500 to-indigo-600 text-slate-950 shadow-lg shadow-sky-500/25 scale-105"
-                      : "bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    selectedAsset === asset.symbol
+                      ? "bg-[#192233] text-white border border-[#2b374e]"
+                      : "text-slate-400 hover:text-white hover:bg-[#0b0e14]"
                   }`}
                 >
-                  <span className="w-5 h-5 rounded-lg bg-slate-950/40 flex items-center justify-center text-xs font-bold">
-                    {asset.icon}
-                  </span>
+                  <span className="text-[#f0b90b] font-bold">{asset.icon}</span>
                   <span>{asset.name}</span>
-                  <span className="text-[10px] opacity-75 font-mono">
-                    {asset.symbol.replace("USDT", "")}
-                  </span>
                 </button>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shrink-0">
-            <span className="text-[10px] font-bold text-slate-400 px-2 uppercase tracking-wider">
-              Expiry:
-            </span>
-            {timeframes.map((tf) => (
-              <button
-                key={tf}
-                onClick={() => setTimeframe(tf)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition ${
-                  timeframe === tf
-                    ? "bg-emerald-500 text-slate-950 shadow-md font-extrabold"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {tf}
-              </button>
-            ))}
+          {/* Wallet Balance & Transfer */}
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="bg-[#0b0e14] px-3.5 py-1.5 rounded-xl border border-[#1e2638]">
+              <span className="text-slate-400 font-sans">Options Wallet: </span>
+              <span className="text-[#0ecb81] font-bold">${personalBalance.toFixed(2)}</span>
+            </div>
+
+            <button
+              onClick={() => setIsTransferModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#192233] hover:bg-[#232c40] text-slate-200 rounded-xl text-xs font-bold border border-[#2b374e] transition-colors"
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5 text-[#f0b90b]" />
+              <span>Transfer</span>
+            </button>
           </div>
         </div>
 
-        {/* MAIN TERMINAL GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* REAL TRADINGVIEW STYLE LIVE CHART */}
-          <div className="lg:col-span-8 glass-panel p-6 rounded-3xl border border-slate-800/90 flex flex-col justify-between space-y-4 relative overflow-hidden shadow-2xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
-                    {selectedAsset}
-                  </h2>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-bold flex items-center gap-1.5 shadow-sm">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    LIVE TICK STREAM
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-4 mt-1">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight">
-                    ${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
-                  <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-xl border border-emerald-500/20 font-mono">
-                    +{winPayoutRate}% Win Multiplier
-                  </span>
-                </div>
-              </div>
-
-              <div className="text-right hidden sm:block">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">
-                  Personal Options Wallet
-                </span>
-                <span className="text-lg font-black font-mono text-sky-400">
-                  {session ? `$${personalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "Login Required"}
-                </span>
-              </div>
-            </div>
-
-            {/* Active Trade Banner Alert */}
-            {activePendingTrade && (
-              <div
-                className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs transition animate-pulse ${
-                  isPriceWinning
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                    : "bg-amber-500/10 border-amber-500/30 text-amber-300"
-                }`}
-              >
-                <div className="flex items-center gap-2 font-mono">
-                  <Flame className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="font-bold">
-                    ACTIVE {activePendingTrade.direction} POSITION @ STRIKE ${activePendingTrade.strikePrice}
-                  </span>
-                </div>
-                <span className="font-mono text-white font-bold bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                  {Math.max(0, Math.ceil((new Date(activePendingTrade.expiresAt).getTime() - nowTime) / 1000))}s REMAINING
-                </span>
-              </div>
-            )}
-
-            {/* LIVE REAL-TIME RECHARTS COMPONENT */}
+        {/* Main Trading Desk Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Official Binance TradingView Chart (8 cols) */}
+          <div className="lg:col-span-8 space-y-4">
             <LiveTradingChart
               symbol={selectedAsset}
               livePrice={livePrice}
               activeStrikePrice={activePendingTrade?.strikePrice ? Number(activePendingTrade.strikePrice) : null}
               activeDirection={activePendingTrade?.direction || null}
-              height={360}
+              height={480}
             />
           </div>
 
-          {/* ORDER ENTRY & STAKE PANEL */}
-          <div className="lg:col-span-4 glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col justify-between space-y-6 shadow-2xl">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-amber-400" />
-                  Order Execution
-                </h3>
-                <span className="text-xs text-sky-400 font-mono font-bold">Expiry: {timeframe}</span>
+          {/* Right Column: Binary Options Order Desk (4 cols) */}
+          <div className="lg:col-span-4 bg-[#121722] border border-[#1e2638] rounded-2xl p-6 space-y-6">
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="text-lg font-bold text-white">Options Order Desk</h3>
+                <span className="text-[10px] font-mono font-bold text-[#0ecb81] bg-[#0ecb81]/10 px-2 py-0.5 rounded border border-[#0ecb81]/30">
+                  {winPayoutRate}% PAYOUT
+                </span>
               </div>
+              <p className="text-xs text-slate-400">
+                Predict direction at settlement expiry to earn fixed +{winPayoutRate}% ROI.
+              </p>
+            </div>
 
-              {!session && (
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
-                  <Lock className="w-4 h-4 shrink-0 text-amber-400" />
-                  <span>Authentication required to place live binary option bets.</span>
-                </div>
-              )}
-
-              {error && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {successMsg && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>{successMsg}</span>
-                </div>
-              )}
-
-              {/* Stake Amount Input */}
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-bold text-slate-300">
-                      Stake Amount ($)
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      {session ? `Personal Balance: $${personalBalance.toFixed(2)}` : "Login to View Balance"}
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    step="any"
-                    value={stakeAmount}
-                    onChange={(e) => setStakeAmount(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none font-bold"
-                    placeholder="50"
-                  />
-                </div>
-
-                {/* Stake Presets */}
-                <div className="grid grid-cols-4 gap-2">
-                  {[10, 50, 100, 250].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setStakeAmount(amt.toString())}
-                      className="py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-mono border border-slate-800 font-bold transition"
-                    >
-                      ${amt}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Percentage Stake Bar */}
-                <div className="grid grid-cols-4 gap-1.5">
-                  {[25, 50, 75, 100].map((pct) => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setPercentageStake(pct)}
-                      className="py-1 bg-slate-950 hover:bg-slate-900 text-sky-400 rounded-lg text-[10px] font-mono border border-slate-800 font-bold transition"
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                </div>
-
-                {/* Live Sentiment Meter */}
-                <div className="space-y-1 pt-1">
-                  <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase">
-                    <span className="text-emerald-400">CALL SENTIMENT: 68%</span>
-                    <span className="text-rose-400">PUT: 32%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-rose-500/40 rounded-full overflow-hidden flex">
-                    <div className="h-full bg-emerald-500 w-[68%]"></div>
-                  </div>
-                </div>
-
-                {/* Expected Return Calculator */}
-                <div className="p-3 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-1.5 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>Configured Win Payout:</span>
-                    <span className="text-emerald-400 font-bold font-mono">+{winPayoutRate}%</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Entry Strike Price:</span>
-                    <span className="font-mono text-white font-bold">${livePrice.toLocaleString()}</span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-sm">
-                    <span className="text-white">Est. Win Return:</span>
-                    <span className="font-mono text-emerald-400">${expectedPayout}</span>
-                  </div>
-                </div>
+            {/* Timeframe Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 block">Expiry Duration</label>
+              <div className="grid grid-cols-3 gap-2 font-mono">
+                {timeframes.map((tf) => (
+                  <button
+                    key={tf}
+                    type="button"
+                    onClick={() => setTimeframe(tf)}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all ${
+                      timeframe === tf
+                        ? "bg-[#f0b90b] text-[#0b0e14] shadow"
+                        : "bg-[#0b0e14] text-slate-400 hover:text-white border border-[#1e2638]"
+                    }`}
+                  >
+                    {tf.toUpperCase()}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* CALL / PUT EXECUTION BUTTONS */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Stake Amount Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 block">Stake Amount ($ USD)</label>
+              <div className="grid grid-cols-4 gap-2 font-mono text-xs mb-2">
+                {["25", "50", "100", "500"].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setStakeAmount(amt)}
+                    className={`py-1.5 rounded-lg border text-center transition-all ${
+                      stakeAmount === amt
+                        ? "bg-[#192233] border-[#38bdf8] text-white font-bold"
+                        : "bg-[#0b0e14] border-[#1e2638] text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                value={stakeAmount}
+                onChange={(e) => setStakeAmount(e.target.value)}
+                placeholder="100.00"
+                className="w-full bg-[#0b0e14] border border-[#1e2638] rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-white outline-none focus:border-[#38bdf8]"
+              />
+            </div>
+
+            {/* Payout Summary Box */}
+            <div className="p-4 bg-[#0b0e14] rounded-xl border border-[#1e2638] space-y-2 text-xs font-mono">
+              <div className="flex justify-between text-slate-400">
+                <span>Investment Stake:</span>
+                <span className="text-white font-bold">${parseFloat(stakeAmount) || 0}</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Profit Return ({winPayoutRate}%):</span>
+                <span className="text-[#0ecb81] font-bold">+${((parseFloat(stakeAmount) || 0) * (winPayoutRate / 100)).toFixed(2)}</span>
+              </div>
+              <div className="pt-2 border-t border-[#1e2638] flex justify-between text-sm font-bold">
+                <span className="text-slate-200">Total Payout:</span>
+                <span className="text-[#0ecb81]">${calculatedPayout.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Notifications */}
+            {error && (
+              <div className="p-3 bg-[#f6465d]/10 border border-[#f6465d]/30 rounded-xl text-xs text-[#f6465d] flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+            {successMsg && (
+              <div className="p-3 bg-[#0ecb81]/10 border border-[#0ecb81]/30 rounded-xl text-xs text-[#0ecb81] flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{successMsg}</span>
+              </div>
+            )}
+
+            {/* Action Trade Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
-                onClick={() => handlePlaceTrade("CALL")}
+                onClick={() => handleExecuteTrade("CALL")}
                 disabled={loading}
-                className="py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/25 transition flex flex-col items-center justify-center gap-1 disabled:opacity-50"
+                className="py-3.5 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e14] font-black rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-5 h-5" />
-                  <span>HIGHER (CALL)</span>
-                </div>
-                <span className="text-[10px] opacity-80 font-normal">
-                  {session ? "Price will rise" : "Login Required to Bet"}
-                </span>
+                <TrendingUp className="w-5 h-5" />
+                <span>CALL (HIGHER ▲)</span>
               </button>
 
               <button
-                onClick={() => handlePlaceTrade("PUT")}
+                onClick={() => handleExecuteTrade("PUT")}
                 disabled={loading}
-                className="py-4 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-rose-500/25 transition flex flex-col items-center justify-center gap-1 disabled:opacity-50"
+                className="py-3.5 bg-[#f6465d] hover:bg-[#e0354c] text-white font-black rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <div className="flex items-center gap-1">
-                  <TrendingDown className="w-5 h-5" />
-                  <span>LOWER (PUT)</span>
-                </div>
-                <span className="text-[10px] opacity-80 font-normal">
-                  {session ? "Price will fall" : "Login Required to Bet"}
-                </span>
+                <TrendingDown className="w-5 h-5" />
+                <span>PUT (LOWER ▼)</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* TRADES AUDIT & LIVE COUNTDOWN HISTORY */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 shadow-2xl">
-          <div className="flex items-center justify-between">
+        {/* ORDER HISTORY TABLE */}
+        <div className="bg-[#121722] border border-[#1e2638] rounded-2xl p-6 space-y-4">
+          <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-sky-400" />
-              Active & Settled Binary Option Trades
+              <Clock className="w-5 h-5 text-[#f0b90b]" />
+              Position &amp; Order History
             </h3>
-            <span className="text-xs text-slate-400 font-mono">
-              Auto-Settlement Engine Active
-            </span>
+            <span className="text-xs text-slate-400 font-mono">Total Positions: {trades.length}</span>
           </div>
 
-          {!session ? (
-            <div className="text-center py-12 text-slate-400 text-xs bg-slate-900/40 rounded-2xl border border-slate-800 space-y-3">
-              <p>Please log in to view your binary option trades audit and live active countdowns.</p>
-              <button
-                onClick={() => router.push("/login?callbackUrl=/options")}
-                className="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs shadow-md"
-              >
-                Sign In to Trade
-              </button>
-            </div>
-          ) : trades.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 text-xs bg-slate-900/40 rounded-2xl border border-slate-800">
-              No options trades found. Select 1m or 5m expiry above and place a trade!
+          {trades.length === 0 ? (
+            <div className="text-center py-10 text-slate-500 text-xs bg-[#0b0e14] rounded-xl border border-[#1e2638]">
+              No positions open yet. Select a timeframe &amp; stake amount to launch your first options trade.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
-                    <th className="pb-3 px-3">Asset</th>
-                    <th className="pb-3 px-3">Direction</th>
-                    <th className="pb-3 px-3">Stake</th>
-                    <th className="pb-3 px-3">Strike Price</th>
-                    <th className="pb-3 px-3">Settlement Price</th>
-                    <th className="pb-3 px-3">Timeframe</th>
-                    <th className="pb-3 px-3">Countdown / Status</th>
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-[#0b0e14] text-slate-400 uppercase text-[10px] border-b border-[#1e2638]">
+                  <tr>
+                    <th className="p-3">Asset</th>
+                    <th className="p-3">Direction</th>
+                    <th className="p-3">Stake</th>
+                    <th className="p-3">Strike Price</th>
+                    <th className="p-3">Settlement</th>
+                    <th className="p-3">Payout</th>
+                    <th className="p-3">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 font-mono">
-                  {trades.map((t) => {
-                    const remainingSec = Math.max(
-                      0,
-                      Math.ceil((new Date(t.expiresAt).getTime() - nowTime) / 1000)
-                    );
+                <tbody className="divide-y divide-[#1e2638]/60 text-slate-200">
+                  {trades.map((trade) => {
+                    const isPending = trade.status === "PENDING";
+                    const isWin = trade.status === "WIN";
+                    const isLoss = trade.status === "LOSS";
 
                     return (
-                      <tr key={t.id} className="hover:bg-slate-900/40 transition">
-                        <td className="py-3 px-3 font-bold text-white">{t.symbol}</td>
-                        <td className="py-3 px-3">
+                      <tr key={trade.id} className="hover:bg-[#1a2130]/50 transition-colors">
+                        <td className="p-3 font-bold text-white">{trade.symbol}</td>
+                        <td className="p-3">
                           <span
-                            className={`font-bold px-2 py-0.5 rounded ${
-                              t.direction === "CALL"
-                                ? "bg-emerald-500/10 text-emerald-400"
-                                : "bg-rose-500/10 text-rose-400"
+                            className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                              trade.direction === "CALL"
+                                ? "bg-[#0ecb81]/10 text-[#0ecb81]"
+                                : "bg-[#f6465d]/10 text-[#f6465d]"
                             }`}
                           >
-                            {t.direction}
+                            {trade.direction}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-slate-200">${t.stakeAmount.toFixed(2)}</td>
-                        <td className="py-3 px-3 text-slate-300">${t.strikePrice.toLocaleString()}</td>
-                        <td className="py-3 px-3 text-slate-300">
-                          {t.settlementPrice ? `$${t.settlementPrice.toLocaleString()}` : "---"}
+                        <td className="p-3">${Number(trade.stakeAmount).toFixed(2)}</td>
+                        <td className="p-3">${Number(trade.strikePrice).toFixed(2)}</td>
+                        <td className="p-3">
+                          {trade.settlementPrice ? `$${Number(trade.settlementPrice).toFixed(2)}` : "—"}
                         </td>
-                        <td className="py-3 px-3 text-slate-400">{t.expiryTimeframe}</td>
-                        <td className="py-3 px-3">
-                          {t.status === "PENDING" ? (
-                            <span className="font-bold px-2.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
-                              PENDING ({remainingSec}s)
-                            </span>
+                        <td className="p-3 font-bold">
+                          {isWin ? (
+                            <span className="text-[#0ecb81]">+${(Number(trade.stakeAmount) * Number(trade.payoutMultiplier)).toFixed(2)}</span>
+                          ) : isLoss ? (
+                            <span className="text-[#f6465d]">$0.00</span>
                           ) : (
-                            <span
-                              className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
-                                t.status === "WIN"
-                                  ? "bg-emerald-500 text-slate-950 shadow-md"
-                                  : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                              }`}
-                            >
-                              {t.status}
-                            </span>
+                            <span className="text-slate-400">Pending</span>
                           )}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                              isWin
+                                ? "bg-[#0ecb81]/10 text-[#0ecb81] border border-[#0ecb81]/30"
+                                : isLoss
+                                ? "bg-[#f6465d]/10 text-[#f6465d] border border-[#f6465d]/30"
+                                : "bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 animate-pulse"
+                            }`}
+                          >
+                            {trade.status}
+                          </span>
                         </td>
                       </tr>
                     );
@@ -556,6 +425,13 @@ export default function OptionsPage() {
       </main>
 
       <Footer />
+
+      <WalletTransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        wallets={{ holdingBalance, botBalance: 0, personalTradingBalance: personalBalance }}
+        onSuccess={fetchTradesAndWallet}
+      />
     </div>
   );
 }
