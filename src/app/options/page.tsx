@@ -325,7 +325,7 @@ export default function OptionsPage() {
                 className="py-3.5 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e14] font-black rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <TrendingUp className="w-5 h-5" />
-                <span>CALL (HIGHER ▲)</span>
+                <span>CALL</span>
               </button>
 
               <button
@@ -334,7 +334,7 @@ export default function OptionsPage() {
                 className="py-3.5 bg-[#f6465d] hover:bg-[#e0354c] text-white font-black rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <TrendingDown className="w-5 h-5" />
-                <span>PUT (LOWER ▼)</span>
+                <span>PUT</span>
               </button>
             </div>
           </div>
