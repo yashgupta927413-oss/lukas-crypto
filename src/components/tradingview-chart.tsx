@@ -4,13 +4,13 @@ import React, { useEffect, useRef, memo } from "react";
 
 interface TradingViewChartProps {
   symbol?: string;
-  height?: number;
+  height?: number | string;
   interval?: string;
 }
 
 function TradingViewChart({
   symbol = "BTCUSDT",
-  height = 520,
+  height,
   interval = "1",
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,10 +58,15 @@ function TradingViewChart({
     containerRef.current.appendChild(script);
   }, [tvSymbol, interval]);
 
+  // Determine dynamic container style
+  const containerStyle = typeof height === "number" ? { height: `${height}px` } : undefined;
+
   return (
     <div
-      className="w-full rounded-2xl overflow-hidden border border-[#1e2638] bg-[#090d16] shadow-2xl relative"
-      style={{ height: `${height}px` }}
+      className={`w-full rounded-2xl overflow-hidden border border-[#1e2638] bg-[#090d16] shadow-2xl relative ${
+        !height ? "h-[360px] sm:h-[480px] lg:h-[540px]" : ""
+      }`}
+      style={containerStyle}
     >
       <div
         ref={containerRef}

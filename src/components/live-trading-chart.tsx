@@ -15,7 +15,7 @@ interface LiveTradingChartProps {
 export default function LiveTradingChart({
   symbol,
   livePrice,
-  height = 520,
+  height,
 }: LiveTradingChartProps) {
   return (
     <div className="w-full relative bg-[#090d16] rounded-2xl border border-[#1e2638] p-3 shadow-2xl space-y-2">

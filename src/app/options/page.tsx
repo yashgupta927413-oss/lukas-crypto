@@ -220,7 +220,6 @@ export default function OptionsPage() {
               livePrice={livePrice}
               activeStrikePrice={activePendingTrade?.strikePrice ? Number(activePendingTrade.strikePrice) : null}
               activeDirection={activePendingTrade?.direction || null}
-              height={480}
             />
           </div>
 
