@@ -10,7 +10,7 @@ interface TradingViewChartProps {
 
 function TradingViewChart({
   symbol = "BTCUSDT",
-  height = 460,
+  height = 520,
   interval = "1",
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,13 +40,16 @@ function TradingViewChart({
       interval: interval,
       timezone: "Etc/UTC",
       theme: "dark",
-      style: "1", // 1 = Japanese Candlestick
+      style: "1", // 1 = Japanese Candlesticks
       locale: "en",
       enable_publishing: false,
       backgroundColor: "#090d16",
-      gridColor: "#1e293b",
+      gridColor: "rgba(30, 41, 59, 0.4)",
       hide_side_toolbar: false,
       allow_symbol_change: true,
+      show_popup_button: true,
+      popup_width: "1000",
+      popup_height: "650",
       calendar: false,
       hide_volume: false,
       support_host: "https://www.tradingview.com",
@@ -56,11 +59,14 @@ function TradingViewChart({
   }, [tvSymbol, interval]);
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-slate-800 bg-[#090d16] shadow-2xl relative">
+    <div
+      className="w-full rounded-2xl overflow-hidden border border-[#1e2638] bg-[#090d16] shadow-2xl relative"
+      style={{ height: `${height}px` }}
+    >
       <div
         ref={containerRef}
-        className="tradingview-widget-container w-full"
-        style={{ height: `${height}px` }}
+        className="tradingview-widget-container w-full h-full"
+        style={{ height: "100%", width: "100%" }}
       />
     </div>
   );
