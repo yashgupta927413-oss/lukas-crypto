@@ -1,21 +1,20 @@
 "use client";
 
+import React from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import {
-  Bot,
+  Vault,
   Gift,
   Lock,
   CheckCircle2,
   AlertCircle,
   Clock,
   TrendingUp,
-  Sparkles,
   Layers,
-  ArrowRight,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -80,7 +79,7 @@ export default function BotsPage() {
 
     const topUp = parseFloat(topUpAmount);
     if (isNaN(topUp) || topUp < 0) {
-      setError("Please enter a valid top-up amount");
+      setError("Please enter a valid amount");
       return;
     }
 
@@ -98,400 +97,298 @@ export default function BotsPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Bot activation failed");
-      }
 
-      setSuccessMsg("AI Bot Contract activated successfully! Funds locked & generating daily yield.");
-      setSelectedTier(null);
-      fetchData();
-      setTimeout(() => setSuccessMsg(null), 4000);
+      if (res.ok) {
+        setSuccessMsg(`🚀 Vault ${selectedTier.name} activated!`);
+        setSelectedTier(null);
+        fetchData();
+      } else {
+        setError(data.error || "Failed to activate vault");
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to activate bot contract");
+      setError(err.message || "Error processing vault activation");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleReleaseContract = async (contractId: string) => {
-    try {
-      const res = await fetch("/api/bots", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "RELEASE",
-          contractId,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Release failed");
-      }
-
-      setSuccessMsg(`Contract matured! $${data.totalReleaseAmount.toFixed(2)} transferred back to Holding Wallet.`);
-      fetchData();
-      setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      alert(err.message);
     }
   };
 
   const hasUsedTrial = contracts.some((c) => c.trialBonusUsed > 0);
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Header */}
-        <div className="bg-[#121620] p-6 sm:p-8 rounded-2xl border border-[#1f2430]">
+        <div className="bg-[#12161f] p-6 rounded-lg border border-[#263044]">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 uppercase font-mono tracking-wider">
-                STRUCTURED VAULTS
-              </span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Quantitative Yield Vaults
             </h1>
-            <p className="text-xs text-slate-400 max-w-2xl">
-              Lock capital into structured quantitative yield strategies to earn daily yield compounding credited directly to your Vault balance.
+            <p className="text-xs text-[#848e9c] max-w-2xl">
+              Lock assets into structured yield strategies for 30 to 365 days. Daily earnings accrue automatically into your Vault account.
             </p>
           </div>
         </div>
 
-        {/* $100 Free Trial Credit Status Banner */}
-        <div className="bg-[#121722] p-6 rounded-2xl border border-[#1e2638] flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#0ecb81]/10 border border-[#0ecb81]/30 flex items-center justify-center text-[#0ecb81] shrink-0 font-bold text-lg">
+        {/* Welcome Bonus Banner */}
+        <div className="bg-[#12161f] p-5 rounded-lg border border-[#263044] flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded bg-[#f0b90b]/10 text-[#f0b90b] font-bold text-base flex items-center justify-center border border-[#f0b90b]/30">
               🎁
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">
-                  ${globalConfig.trialCreditAmount || 100} Free Trial Bonus
-                </h3>
+                <span className="font-bold text-white text-sm">
+                  ${globalConfig.trialCreditAmount || 100} Welcome Trial Credit
+                </span>
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                     hasUsedTrial
-                      ? "bg-slate-800 text-slate-400 border border-slate-700"
-                      : "bg-[#0ecb81] text-[#0b0e14]"
+                      ? "bg-[#181e2a] text-[#848e9c] border border-[#263044]"
+                      : "bg-[#0ecb81] text-[#0b0e11]"
                   }`}
                 >
-                  {hasUsedTrial ? "REDEEMED" : "AVAILABLE"}
+                  {hasUsedTrial ? "REDEEMED" : "AVAILABLE NOW"}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-[11px] text-[#848e9c] mt-0.5 font-sans">
                 {hasUsedTrial
-                  ? "You have already claimed your $100 free trial bonus on a contract."
-                  : "Combine your $100 Free Trial Credit with a $400 top-up to activate the $500 minimum bot plan."}
+                  ? "Your $100 trial credit has been allocated to an active/completed vault."
+                  : "Apply your $100 Welcome Credit with a $400 top-up to activate the $500 minimum vault."}
               </p>
             </div>
           </div>
         </div>
 
         {successMsg && (
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-semibold flex items-center gap-2 animate-in fade-in">
-            <CheckCircle2 className="w-5 h-5 shrink-0" />
+          <div className="p-3 rounded bg-[#0ecb81]/10 border border-[#0ecb81]/30 text-[#0ecb81] text-xs font-semibold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        {/* BOT TIERS GRID */}
-        <div>
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-sky-400" />
-            Select AI Trading Bot Plan
-          </h2>
+        {/* VAULT TIERS GRID */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-white uppercase font-mono tracking-wider flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#f0b90b]" />
+              Structured Earn Strategies
+            </h2>
+            <span className="text-xs text-[#848e9c] font-mono">Available: {tiers.length}</span>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {tiers.map((tier) => (
               <div
                 key={tier.id}
-                className="glass-card glass-card-hover p-6 rounded-3xl flex flex-col justify-between border border-slate-800 relative overflow-hidden"
+                className="bg-[#12161f] p-5 rounded-lg border border-[#263044] hover:border-[#323e57] flex flex-col justify-between transition-colors"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold">
-                      {tier.durationDays} DAYS DURATION
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[#181e2a] text-[#38bdf8] border border-[#263044] font-bold">
+                      {tier.durationDays} DAYS TERM
                     </span>
-                    <span className="text-xs font-bold text-emerald-400 font-mono">
+                    <span className="text-xs font-bold text-[#0ecb81] font-mono">
                       +{tier.minRoiPercent}% EST. ROI
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-extrabold text-white mb-1">{tier.name}</h3>
+                  <h3 className="text-base font-bold text-white">{tier.name}</h3>
 
-                  <div className="my-4 py-3 border-y border-slate-800/80 space-y-2 text-xs">
-                    <div className="flex justify-between text-slate-400">
+                  <div className="py-2 border-y border-[#263044] space-y-1.5 text-xs font-mono">
+                    <div className="flex justify-between text-[#848e9c]">
                       <span>Minimum Principal:</span>
-                      <strong className="text-white font-mono">${tier.minDeposit.toLocaleString()}</strong>
+                      <span className="text-white font-bold">${tier.minDeposit.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Maximum Deposit:</span>
-                      <strong className="text-white font-mono">${tier.maxDeposit.toLocaleString()}</strong>
+                    <div className="flex justify-between text-[#848e9c]">
+                      <span>Daily Yield Accrual:</span>
+                      <span className="text-[#0ecb81] font-bold">Automatic</span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>Trial Credit Eligible:</span>
-                      <strong className="text-emerald-400 font-semibold">YES ($100 Bonus)</strong>
+                    <div className="flex justify-between text-[#848e9c]">
+                      <span>Term Maturity:</span>
+                      <span className="text-slate-300 font-bold">{tier.durationDays} Days</span>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={() => {
-                    if (!session) {
-                      router.push("/login?callbackUrl=/bots");
-                      return;
-                    }
                     setSelectedTier(tier);
-                    setUseTrialCredit(!hasUsedTrial);
-                    setTopUpAmount(hasUsedTrial ? tier.minDeposit.toString() : "400");
+                    setError(null);
                   }}
-                  className="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-bold rounded-2xl shadow-lg shadow-sky-500/20 transition flex items-center justify-center gap-2"
+                  className="w-full mt-4 py-2 bg-[#263044] hover:bg-[#323e57] text-[#f0b90b] font-bold rounded text-xs transition-colors"
                 >
-                  <span>Activate Plan</span>
-                  <ArrowRight className="w-4 h-4" />
+                  Allocate Principal →
                 </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* USER CONTRACTS LIST */}
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Bot className="w-5 h-5 text-amber-400" />
-                My AI Bot Portfolio & Daily Yield Logs
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Daily profits are updated daily via the Admin Panel and added directly to your accumulated yield below.
-              </p>
-            </div>
+        {/* ACTIVE VAULT CONTRACTS TABLE */}
+        <div className="bg-[#12161f] border border-[#263044] rounded-lg p-5 space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xs font-bold text-white uppercase font-mono tracking-wider flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#f0b90b]" />
+              Active Vault Allocations ({contracts.length})
+            </h3>
           </div>
 
           {contracts.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 text-xs bg-slate-900/40 rounded-2xl border border-slate-800">
-              No active or previous bot contracts found. Select a bot tier above to get started!
+            <div className="text-center py-8 text-[#848e9c] text-xs bg-[#0b0e11] rounded border border-[#263044]">
+              No active vault allocations. Select a strategy tier above to begin earning daily yield.
             </div>
           ) : (
-            <div className="space-y-4">
-              {contracts.map((c) => {
-                const isExpanded = expandedContractId === c.id;
-                const isMatured = new Date() >= new Date(c.endDate);
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-[#0b0e11] text-[#848e9c] uppercase text-[10px] border-b border-[#263044]">
+                  <tr>
+                    <th className="p-2.5">Vault Tier</th>
+                    <th className="p-2.5">Principal</th>
+                    <th className="p-2.5">Yield Earned</th>
+                    <th className="p-2.5">Maturity Date</th>
+                    <th className="p-2.5">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#263044]/50 text-slate-200">
+                  {contracts.map((c) => {
+                    const isCompleted = c.status === "COMPLETED";
+                    const isExpanded = expandedContractId === c.id;
 
-                return (
-                  <div
-                    key={c.id}
-                    className="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden transition"
-                  >
-                    <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-base font-bold text-white">{c.tierName}</h3>
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              c.status === "ACTIVE"
-                                ? "bg-amber-500/10 text-amber-300 border border-amber-500/20"
-                                : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            }`}
-                          >
-                            {c.status}
-                          </span>
-                        </div>
-                        <div className="text-xs text-slate-400 flex flex-wrap items-center gap-4 font-mono">
-                          <span>Principal: <strong>${c.principal.toFixed(2)}</strong></span>
-                          <span>(Trial Used: ${c.trialBonusUsed.toFixed(2)})</span>
-                          <span>Lock Ends: {new Date(c.endDate).toISOString().split("T")[0]}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                            Accumulated Yield
-                          </span>
-                          <span className="text-base font-black font-mono text-emerald-400">
-                            +${c.accumulatedProfit.toFixed(2)}
-                          </span>
-                        </div>
-
-                        {c.status === "ACTIVE" && isMatured ? (
-                          <button
-                            onClick={() => handleReleaseContract(c.id)}
-                            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition"
-                          >
-                            Claim to Holding Wallet
-                          </button>
-                        ) : c.status === "ACTIVE" ? (
-                          <span className="text-[11px] bg-slate-800 text-amber-300 border border-slate-700 px-3 py-1.5 rounded-xl font-mono flex items-center gap-1">
-                            <Lock className="w-3 h-3" /> LOCKED
-                          </span>
-                        ) : (
-                          <span className="text-xs text-emerald-400 font-semibold px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                            RELEASED TO HOLDING
-                          </span>
-                        )}
-
-                        <button
+                    return (
+                      <React.Fragment key={c.id}>
+                        <tr
                           onClick={() => setExpandedContractId(isExpanded ? null : c.id)}
-                          className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800"
+                          className="hover:bg-[#181e2a] cursor-pointer transition-colors"
                         >
-                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
+                          <td className="p-2.5 font-bold text-white flex items-center gap-2">
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-[#848e9c]" />}
+                            <span>{c.tierName}</span>
+                          </td>
+                          <td className="p-2.5 font-bold">${Number(c.totalDeposit).toFixed(2)}</td>
+                          <td className="p-2.5 text-[#0ecb81] font-bold">+${Number(c.accumulatedProfit).toFixed(2)}</td>
+                          <td className="p-2.5 text-[#848e9c]">{new Date(c.endDate).toLocaleDateString()}</td>
+                          <td className="p-2.5">
+                            <span
+                              className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                                isCompleted
+                                  ? "bg-[#0ecb81]/10 text-[#0ecb81]"
+                                  : "bg-[#f0b90b]/10 text-[#f0b90b]"
+                              }`}
+                            >
+                              {c.status}
+                            </span>
+                          </td>
+                        </tr>
 
-                    {/* EXPANDED YIELD LOGS */}
-                    {isExpanded && (
-                      <div className="bg-slate-950/60 p-4 border-t border-slate-800 space-y-3">
-                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                          Daily Yield Injections Log ({c.yieldLogs?.length || 0})
-                        </h4>
-
-                        {c.yieldLogs && c.yieldLogs.length > 0 ? (
-                          <div className="space-y-2">
-                            {c.yieldLogs.map((log: any) => (
-                              <div
-                                key={log.id}
-                                className="flex items-center justify-between bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-xs"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="text-slate-400 font-mono">
-                                    {new Date(log.createdAt).toLocaleString()}
-                                  </span>
-                                  <span className="text-sky-400 font-bold px-1.5 py-0.2 rounded bg-sky-500/10">
-                                    +{log.yieldPercent}% Daily
-                                  </span>
+                        {isExpanded && (
+                          <tr className="bg-[#0b0e11]">
+                            <td colSpan={5} className="p-4 space-y-2">
+                              <div className="text-xs font-bold text-white mb-2">Daily Yield Log:</div>
+                              {c.logs && c.logs.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                  {c.logs.map((log: any) => (
+                                    <div key={log.id} className="p-2 bg-[#12161f] rounded border border-[#263044] flex justify-between text-[11px]">
+                                      <span className="text-[#848e9c]">{new Date(log.createdAt).toLocaleDateString()}</span>
+                                      <span className="text-[#0ecb81] font-bold">+${Number(log.profitAmount).toFixed(2)}</span>
+                                    </div>
+                                  ))}
                                 </div>
-                                <span className="font-mono font-bold text-emerald-400">
-                                  +${log.profitAmount.toFixed(2)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-slate-500 italic">
-                            No daily yield logs posted yet. Check back when the Admin posts daily ROI updates!
-                          </div>
+                              ) : (
+                                <div className="text-[#848e9c] text-xs">First daily yield log pending...</div>
+                              )}
+                            </td>
+                          </tr>
                         )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
-      </main>
 
-      {/* ACTIVATION MODAL */}
-      {selectedTier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="w-full max-w-lg glass-panel border border-slate-800 rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95">
-            <h3 className="text-xl font-bold text-white mb-1">
-              Activate {selectedTier.name}
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Duration: {selectedTier.durationDays} Days | Min Deposit: ${selectedTier.minDeposit}
-            </p>
-
-            {error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+        {/* Vault Activation Modal */}
+        {selectedTier && (
+          <div className="fixed inset-0 z-50 bg-[#0b0e11]/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#12161f] border border-[#263044] rounded-lg max-w-md w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+              <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
+                <h3 className="text-base font-bold text-white">Allocate to {selectedTier.name}</h3>
+                <button
+                  onClick={() => setSelectedTier(null)}
+                  className="text-[#848e9c] hover:text-white text-sm"
+                >
+                  ✕
+                </button>
               </div>
-            )}
 
-            <form onSubmit={handleActivateBot} className="space-y-4">
-              {/* Trial Checkbox */}
-              {!hasUsedTrial && (
-                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Gift className="w-4 h-4 text-emerald-400" />
-                    <div>
-                      <span className="text-xs font-bold text-emerald-400 block">
-                        Apply $100 Free Trial Credit
-                      </span>
-                      <span className="text-[10px] text-slate-300">
-                        Reduces required top-up to $400 for $500 total principal
-                      </span>
-                    </div>
+              <form onSubmit={handleActivateBot} className="space-y-4 font-mono text-xs">
+                <div className="p-3 bg-[#0b0e11] rounded border border-[#263044] space-y-1.5">
+                  <div className="flex justify-between text-[#848e9c]">
+                    <span>Required Principal:</span>
+                    <span className="text-white font-bold">${selectedTier.minDeposit.toLocaleString()}</span>
                   </div>
+                  <div className="flex justify-between text-[#848e9c]">
+                    <span>Holding Balance:</span>
+                    <span className="text-[#0ecb81] font-bold">${holdingBalance.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {!hasUsedTrial && (
+                  <div className="flex items-center gap-2 p-2.5 bg-[#0ecb81]/10 rounded border border-[#0ecb81]/30">
+                    <input
+                      type="checkbox"
+                      id="trialCredit"
+                      checked={useTrialCredit}
+                      onChange={(e) => setUseTrialCredit(e.target.checked)}
+                      className="rounded accent-[#0ecb81]"
+                    />
+                    <label htmlFor="trialCredit" className="text-slate-200 cursor-pointer font-sans">
+                      Apply $100 Welcome Credit (Requires $400 top-up)
+                    </label>
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[#848e9c] font-sans block">Top-up Amount from Holding Account ($)</label>
                   <input
-                    type="checkbox"
-                    checked={useTrialCredit}
-                    onChange={(e) => {
-                      setUseTrialCredit(e.target.checked);
-                      if (e.target.checked) setTopUpAmount("400");
-                    }}
-                    className="w-4 h-4 accent-emerald-500 cursor-pointer"
+                    type="number"
+                    value={topUpAmount}
+                    onChange={(e) => setTopUpAmount(e.target.value)}
+                    placeholder="400.00"
+                    className="w-full bg-[#0b0e11] border border-[#263044] rounded px-3 py-2 text-sm text-white font-bold outline-none focus:border-[#f0b90b]"
                   />
                 </div>
-              )}
 
-              {/* Holding Balance Display */}
-              <div className="flex justify-between text-xs bg-slate-900 p-3 rounded-xl border border-slate-800">
-                <span className="text-slate-400">Holding Wallet Balance:</span>
-                <strong className="text-white font-mono">${holdingBalance.toFixed(2)}</strong>
-              </div>
+                {error && (
+                  <div className="p-2.5 bg-[#f6465d]/10 border border-[#f6465d]/30 text-[#f6465d] rounded">
+                    {error}
+                  </div>
+                )}
 
-              {/* TopUp Input */}
-              <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Holding Wallet Top-up Amount ($)
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={topUpAmount}
-                  onChange={(e) => setTopUpAmount(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none"
-                  required
-                />
-              </div>
-
-              {/* Total Principal Calculation */}
-              <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-1">
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>Trial Credit Bonus:</span>
-                  <span className="font-mono text-emerald-400">+${useTrialCredit ? 100 : 0}</span>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTier(null)}
+                    className="w-1/2 py-2.5 bg-[#181e2a] hover:bg-[#263044] text-white font-bold rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-1/2 py-2.5 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e11] font-bold rounded"
+                  >
+                    {loading ? "Activating..." : "Confirm Allocation"}
+                  </button>
                 </div>
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>User Top-up:</span>
-                  <span className="font-mono text-white">+${parseFloat(topUpAmount || "0").toFixed(2)}</span>
-                </div>
-                <div className="pt-2 border-t border-slate-800 flex justify-between text-sm font-bold">
-                  <span className="text-white">Total Bot Principal:</span>
-                  <span className="font-mono text-amber-400">
-                    ${(parseFloat(topUpAmount || "0") + (useTrialCredit ? 100 : 0)).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedTier(null)}
-                  className="flex-1 py-3 bg-slate-800 text-slate-300 font-semibold rounded-xl text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-sky-500/20 disabled:opacity-50"
-                >
-                  {loading ? "Activating..." : "Confirm & Lock Contract"}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
 
       <Footer />
     </div>
