@@ -13,6 +13,7 @@ import {
   ArrowRightLeft,
   AlertCircle,
   CheckCircle2,
+  Timer,
 } from "lucide-react";
 import WalletTransferModal from "@/components/wallet-transfer-modal";
 
@@ -105,7 +106,7 @@ export default function OptionsPage() {
 
   useEffect(() => {
     fetchTradesAndWallet();
-    const interval = setInterval(fetchTradesAndWallet, 3000);
+    const interval = setInterval(fetchTradesAndWallet, 2000);
     return () => clearInterval(interval);
   }, [session]);
 
@@ -160,6 +161,24 @@ export default function OptionsPage() {
 
   const calculatedPayout = (parseFloat(stakeAmount) || 0) * (1 + winPayoutRate / 100);
 
+  // Helper to format remaining time
+  const getRemainingSec = (expiresAt: string | Date) => {
+    const diffMs = new Date(expiresAt).getTime() - nowTime;
+    return Math.max(0, Math.floor(diffMs / 1000));
+  };
+
+  const formatTimer = (expiresAt: string | Date) => {
+    const totalSec = getRemainingSec(expiresAt);
+    if (totalSec <= 0) return "Settling...";
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  // Find active pending trade
+  const activePendingTrades = trades.filter((t) => t.status === "PENDING");
+  const latestPendingTrade = activePendingTrades[0];
+
   return (
     <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex flex-col font-sans">
       <Navbar />
@@ -198,6 +217,35 @@ export default function OptionsPage() {
             </button>
           </div>
         </div>
+
+        {/* Live Active Trade Countdown Banner */}
+        {latestPendingTrade && (
+          <div className="bg-[#181a20] border border-[#f0b90b]/40 rounded-lg p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 font-bold">
+                <Timer className="w-4 h-4 animate-spin" />
+                <span>POSITION ACTIVE</span>
+              </div>
+              <span className="font-bold text-white">
+                {latestPendingTrade.symbol} {latestPendingTrade.direction} @ ${Number(latestPendingTrade.strikePrice).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <span className="text-[#848e9c] font-sans">Time Remaining:</span>
+                <span className="text-[#f0b90b] font-bold text-sm bg-[#0b0e11] px-3 py-1 rounded border border-[#2b313a]">
+                  ⏱️ {formatTimer(latestPendingTrade.expiresAt)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[#848e9c] font-sans">Current Price:</span>
+                <span className="text-white font-bold">${livePrice.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Trading Desk Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -344,6 +392,7 @@ export default function OptionsPage() {
                     <th className="p-2.5">Stake</th>
                     <th className="p-2.5">Strike Price</th>
                     <th className="p-2.5">Settlement Price</th>
+                    <th className="p-2.5">Countdown / Expiry</th>
                     <th className="p-2.5">Payout</th>
                     <th className="p-2.5">Status</th>
                   </tr>
@@ -373,6 +422,15 @@ export default function OptionsPage() {
                         <td className="p-2.5">
                           {trade.settlementPrice ? `$${Number(trade.settlementPrice).toFixed(2)}` : "—"}
                         </td>
+                        <td className="p-2.5">
+                          {isPending ? (
+                            <span className="text-[#f0b90b] font-bold bg-[#f0b90b]/10 px-2 py-0.5 rounded border border-[#f0b90b]/30">
+                              ⏱️ {formatTimer(trade.expiresAt)}
+                            </span>
+                          ) : (
+                            <span className="text-[#848e9c]">Settled</span>
+                          )}
+                        </td>
                         <td className="p-2.5 font-bold">
                           {isWin ? (
                             <span className="text-[#0ecb81]">+${(Number(trade.stakeAmount) * Number(trade.payoutMultiplier)).toFixed(2)}</span>
@@ -389,7 +447,7 @@ export default function OptionsPage() {
                                 ? "bg-[#0ecb81]/10 text-[#0ecb81]"
                                 : isLoss
                                 ? "bg-[#f6465d]/10 text-[#f6465d]"
-                                : "bg-[#f0b90b]/10 text-[#f0b90b]"
+                                : "bg-[#f0b90b]/10 text-[#f0b90b] animate-pulse"
                             }`}
                           >
                             {trade.status}
