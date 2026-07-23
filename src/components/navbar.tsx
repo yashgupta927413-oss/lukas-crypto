@@ -6,15 +6,11 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import {
   Wallet,
-  TrendingUp,
-  Vault,
   LogOut,
   ChevronDown,
   ArrowRightLeft,
   Menu,
   X,
-  BarChart2,
-  Lock,
 } from "lucide-react";
 import WalletTransferModal from "./wallet-transfer-modal";
 
@@ -89,10 +85,10 @@ export default function Navbar() {
   }, [session]);
 
   const navLinks = [
-    { name: "Markets", href: "/", icon: BarChart2 },
-    { name: "Options Desk", href: "/options", icon: TrendingUp },
-    { name: "Yield Vaults", href: "/bots", icon: Vault },
-    { name: "Portfolio", href: "/dashboard", icon: Wallet },
+    { name: "Markets", href: "/" },
+    { name: "Trade Options", href: "/options" },
+    { name: "Earn Vaults", href: "/bots" },
+    { name: "Portfolio", href: "/dashboard" },
   ];
 
   const totalBalance =
@@ -101,14 +97,14 @@ export default function Navbar() {
     Number(wallets.personalTradingBalance);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#1f2430] bg-[#0b0e14]/98 backdrop-blur-md">
-      {/* Ticker Tape */}
-      <div className="border-b border-[#1f2430]/60 bg-[#07090e] text-[11px] font-mono py-1.5 px-4 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 overflow-x-auto scrollbar-none text-slate-400">
+    <header className="sticky top-0 z-40 w-full border-b border-[#2b313a] bg-[#0b0e11]">
+      {/* Top Spot Ticker Tape */}
+      <div className="border-b border-[#2b313a]/50 bg-[#07090b] text-[11px] font-mono py-1 px-4 sm:px-8">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-6 overflow-x-auto scrollbar-none text-[#848e9c]">
           <div className="flex items-center gap-6 shrink-0">
             {Object.entries(prices).map(([sym, val]) => (
               <div key={sym} className="flex items-center gap-2">
-                <span className="font-sans font-semibold text-slate-300">{sym.replace("USDT", "/USDT")}</span>
+                <span className="font-sans font-semibold text-[#eaecef]">{sym.replace("USDT", "/USDT")}</span>
                 <span className="text-white font-bold">${val.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 <span className={val.change24h >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"}>
                   {val.change24h >= 0 ? "+" : ""}{val.change24h}%
@@ -116,52 +112,40 @@ export default function Navbar() {
               </div>
             ))}
           </div>
-          <div className="hidden lg:flex items-center gap-4 text-slate-400 text-[10px] font-sans">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0ecb81]"></span>
-              <span>Binance Market Feed</span>
-            </span>
-            <span>•</span>
-            <span>256-Bit SSL Encrypted</span>
+          <div className="hidden lg:flex items-center gap-4 text-[#848e9c] text-[11px] font-sans">
+            <span>Binance Market Spot Feed</span>
           </div>
         </div>
       </div>
 
-      {/* Main Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      {/* Main Navbar */}
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-[#181e2b] border border-[#2b3548] flex items-center justify-center text-[#f0b90b] font-bold text-base">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded bg-[#f0b90b] text-[#0b0e11] font-black text-base flex items-center justify-center">
               L
             </div>
-            <div className="flex flex-col">
-              <span className="text-white font-bold text-sm tracking-tight leading-none flex items-center gap-1">
-                LUKAS <span className="text-slate-400 font-normal">FINANCIAL</span>
-              </span>
-              <span className="text-[9px] text-slate-500 font-mono tracking-wider uppercase mt-0.5">
-                Digital Assets Exchange
-              </span>
-            </div>
+            <span className="text-white font-bold text-base tracking-tight font-sans">
+              LUKAS <span className="text-[#f0b90b]">EXCHANGE</span>
+            </span>
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
-              const Icon = link.icon;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                  className={`text-xs font-semibold transition-colors py-4 border-b-2 ${
                     isActive
-                      ? "bg-[#181e2b] text-white border border-[#2b3548]"
-                      : "text-slate-400 hover:text-white hover:bg-[#121620]"
+                      ? "text-[#f0b90b] border-[#f0b90b]"
+                      : "text-[#848e9c] border-transparent hover:text-white"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-[#f0b90b]" : "text-slate-400"}`} />
-                  <span>{link.name}</span>
+                  {link.name}
                 </Link>
               );
             })}
@@ -173,22 +157,22 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
-                  className="flex items-center gap-2.5 bg-[#121620] hover:bg-[#181e2b] border border-[#1f2430] hover:border-[#2b3548] px-3.5 py-2 rounded-xl text-xs transition-all"
+                  className="flex items-center gap-2 bg-[#181a20] hover:bg-[#1e2329] border border-[#2b313a] px-3 py-1.5 rounded text-xs transition-colors"
                 >
-                  <Wallet className="w-4 h-4 text-[#f0b90b]" />
+                  <Wallet className="w-3.5 h-3.5 text-[#f0b90b]" />
                   <div className="text-left font-mono">
-                    <span className="text-[9px] text-slate-500 block font-sans leading-none uppercase">Portfolio Balance</span>
+                    <span className="text-[9px] text-[#848e9c] block font-sans leading-none">Assets</span>
                     <span className="text-white font-bold">${totalBalance.toFixed(2)}</span>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+                  <ChevronDown className="w-3.5 h-3.5 text-[#848e9c] ml-1" />
                 </button>
 
                 {isWalletDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-[#121620] border border-[#1f2430] rounded-2xl p-4 shadow-2xl space-y-3 z-50 animate-in fade-in zoom-in-95">
-                    <div className="flex justify-between items-center pb-2 border-b border-[#1f2430]">
+                  <div className="absolute right-0 mt-2 w-64 bg-[#181a20] border border-[#2b313a] rounded-lg p-3 shadow-2xl space-y-3 z-50">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#2b313a]">
                       <div>
-                        <span className="text-[10px] text-slate-500 font-mono uppercase block">Account</span>
-                        <span className="text-xs font-bold text-white truncate max-w-[180px] block">
+                        <span className="text-[10px] text-[#848e9c] font-mono block">Account</span>
+                        <span className="text-xs font-bold text-white truncate max-w-[160px] block">
                           {session.user?.email}
                         </span>
                       </div>
@@ -202,17 +186,17 @@ export default function Navbar() {
                       )}
                     </div>
 
-                    <div className="space-y-2 text-xs font-mono">
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1f2430]">
-                        <span className="text-slate-400 font-sans">Holding Account</span>
+                    <div className="space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between items-center p-2 rounded bg-[#0b0e11] border border-[#2b313a]">
+                        <span className="text-[#848e9c] font-sans">Holding Account</span>
                         <span className="text-white font-bold">${Number(wallets.holdingBalance).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1f2430]">
-                        <span className="text-slate-400 font-sans">Yield Vaults</span>
+                      <div className="flex justify-between items-center p-2 rounded bg-[#0b0e11] border border-[#2b313a]">
+                        <span className="text-[#848e9c] font-sans">Earn Vaults</span>
                         <span className="text-[#f0b90b] font-bold">${Number(wallets.botBalance).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-[#0b0e14] border border-[#1f2430]">
-                        <span className="text-slate-400 font-sans">Options Trading</span>
+                      <div className="flex justify-between items-center p-2 rounded bg-[#0b0e11] border border-[#2b313a]">
+                        <span className="text-[#848e9c] font-sans">Options Trading</span>
                         <span className="text-[#0ecb81] font-bold">${Number(wallets.personalTradingBalance).toFixed(2)}</span>
                       </div>
                     </div>
@@ -222,26 +206,26 @@ export default function Navbar() {
                         setIsWalletDropdownOpen(false);
                         setIsTransferModalOpen(true);
                       }}
-                      className="w-full py-2 bg-[#181e2b] hover:bg-[#232a3a] text-slate-200 rounded-xl text-xs font-bold border border-[#2b3548] flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-1.5 bg-[#2b313a] hover:bg-[#474d57] text-slate-200 rounded text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <ArrowRightLeft className="w-3.5 h-3.5 text-[#f0b90b]" />
                       Transfer Funds
                     </button>
 
-                    <div className="pt-2 border-t border-[#1f2430] flex justify-between items-center">
+                    <div className="pt-2 border-t border-[#2b313a] flex justify-between items-center text-xs">
                       <Link
                         href="/dashboard"
-                        className="text-xs text-[#38bdf8] hover:underline font-semibold"
+                        className="text-[#f0b90b] hover:underline font-semibold"
                         onClick={() => setIsWalletDropdownOpen(false)}
                       >
-                        Portfolio Details →
+                        Portfolio →
                       </Link>
                       <button
                         onClick={() => signOut()}
-                        className="text-xs text-[#f6465d] hover:underline font-semibold flex items-center gap-1"
+                        className="text-[#f6465d] hover:underline font-semibold flex items-center gap-1"
                       >
                         <LogOut className="w-3.5 h-3.5" />
-                        Sign Out
+                        Log Out
                       </button>
                     </div>
                   </div>
@@ -251,42 +235,41 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-[#121620] transition-colors"
+                  className="px-3.5 py-1.5 rounded text-xs font-semibold text-white bg-[#1e2329] hover:bg-[#2b313a] border border-[#2b313a] transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#f0b90b] text-[#0b0e14] hover:bg-[#d97706] transition-colors shadow"
+                  className="px-3.5 py-1.5 rounded text-xs font-bold bg-[#f0b90b] text-[#0b0e11] hover:bg-[#d97706] transition-colors"
                 >
-                  Open Account
+                  Register
                 </Link>
               </div>
             )}
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-slate-400 hover:text-white"
+              className="md:hidden p-1.5 text-[#848e9c] hover:text-white"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-[#1f2430] bg-[#0b0e14] px-4 py-4 space-y-2">
+        <div className="md:hidden border-t border-[#2b313a] bg-[#0b0e11] px-4 py-3 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center gap-3 p-3 rounded-xl text-sm font-semibold ${
-                pathname === link.href ? "bg-[#181e2b] text-white" : "text-slate-400"
+              className={`block p-2 rounded text-xs font-semibold ${
+                pathname === link.href ? "bg-[#181a20] text-[#f0b90b]" : "text-[#848e9c]"
               }`}
             >
-              <link.icon className="w-5 h-5" />
-              <span>{link.name}</span>
+              {link.name}
             </Link>
           ))}
         </div>

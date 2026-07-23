@@ -3,99 +3,61 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b0e14;
-  --foreground: #f8fafc;
-  --card: #121722;
-  --card-border: #1e2638;
-  --accent-gold: #f0b90b;
-  --accent-green: #0ecb81;
-  --accent-red: #f6465d;
+  --bg-primary: #0b0e11;
+  --bg-[#181a20]: #181a20;
+  --bg-panel: #1e2329;
+  --border-color: #2b313a;
+  --text-primary: #eaecef;
+  --text-secondary: #848e9c;
+  --binance-gold: #f0b90b;
+  --color-green: #0ecb81;
+  --color-red: #f6465d;
 }
 
 body {
-  background-color: #0b0e14;
-  color: #f8fafc;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: #0b0e11;
+  color: #eaecef;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
-  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle background grid - clean & professional */
-.bg-fintech-grid {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-}
-
-/* Institutional Card Styling */
-.fintech-card {
-  background-color: #121722;
-  border: 1px solid #1e2638;
-  border-radius: 1rem;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.fintech-card:hover {
-  border-color: #2b374e;
-}
-
-/* Clean Button Styles */
-.btn-primary {
-  background: linear-gradient(135deg, #f0b90b 0%, #d97706 100%);
-  color: #0b0e14;
-  font-weight: 700;
-  border-radius: 0.75rem;
-  transition: opacity 0.2s ease, transform 0.1s ease;
-}
-
-.btn-primary:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: #1a2130;
-  border: 1px solid #2b374e;
-  color: #f8fafc;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.btn-secondary:hover {
-  background: #232c40;
-  border-color: #3b4966;
-}
-
-/* Typography Helpers */
-.text-gold {
-  color: #f0b90b;
-}
-
-.text-up {
-  color: #0ecb81;
-}
-
-.text-down {
-  color: #f6465d;
-}
-
-/* Custom Clean Scrollbar */
+/* Custom Scrollbar - Binance Style */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0e14;
+  background: #0b0e11;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e2638;
-  border-radius: 3px;
+  background: #2b313a;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b374e;
+  background: #474d57;
+}
+
+/* Custom Utilities */
+.bg-exchange-main {
+  background-color: #0b0e11;
+}
+
+.bg-exchange-card {
+  background-color: #181a20;
+}
+
+.bg-exchange-panel {
+  background-color: #1e2329;
+}
+
+.border-exchange {
+  border-color: #2b313a;
+}
+
+.text-[#848e9c] {
+  color: #848e9c;
 }
