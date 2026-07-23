@@ -145,18 +145,18 @@ export default function BotsPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <div className="bg-[#121722] p-6 sm:p-8 rounded-2xl border border-[#1e2638]">
+        <div className="bg-[#121620] p-6 sm:p-8 rounded-2xl border border-[#1f2430]">
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 uppercase font-mono tracking-wider">
-                QUANTITATIVE VAULTS
+                STRUCTURED VAULTS
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              AI Quantitative Bot Vaults
+            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Quantitative Yield Vaults
             </h1>
             <p className="text-xs text-slate-400 max-w-2xl">
-              Lock funds into automated quantitative trading strategies to earn daily compounding yields credited directly to your Bot balance.
+              Lock capital into structured quantitative yield strategies to earn daily yield compounding credited directly to your Vault balance.
             </p>
           </div>
         </div>

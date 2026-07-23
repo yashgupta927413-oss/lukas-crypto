@@ -224,16 +224,16 @@ export default function OptionsPage() {
           </div>
 
           {/* Right Column: Binary Options Order Desk (4 cols) */}
-          <div className="lg:col-span-4 bg-[#121722] border border-[#1e2638] rounded-2xl p-6 space-y-6">
+          <div className="lg:col-span-4 bg-[#121620] border border-[#1f2430] rounded-2xl p-6 space-y-6">
             <div>
               <div className="flex justify-between items-center mb-1">
-                <h3 className="text-lg font-bold text-white">Options Order Desk</h3>
+                <h3 className="text-base font-bold text-white">Order Execution</h3>
                 <span className="text-[10px] font-mono font-bold text-[#0ecb81] bg-[#0ecb81]/10 px-2 py-0.5 rounded border border-[#0ecb81]/30">
                   {winPayoutRate}% PAYOUT
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Predict direction at settlement expiry to earn fixed +{winPayoutRate}% ROI.
+                Select contract duration and stake amount. Fixed 75% return on winning settlement.
               </p>
             </div>
 
