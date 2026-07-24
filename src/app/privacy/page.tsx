@@ -69,8 +69,8 @@ export default function PrivacyPage() {
         </div>
       </main>
 
-      <footer className="border-t border-slate-800 py-8 text-center text-xs text-slate-500 font-mono">
-        © {new Date().getFullYear()} Lukas Crypto Management. All rights reserved.
+      <footer className="border-t border-[#2b313a] py-6 text-center text-xs text-[#848e9c] font-mono">
+        © {new Date().getFullYear()} Lukas Financial Ltd. All rights reserved.
       </footer>
     </div>
   );

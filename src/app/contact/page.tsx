@@ -120,32 +120,32 @@ export default function ContactPage() {
               <div className="w-12 h-12 rounded-2xl bg-sky-500/20 flex items-center justify-center text-sky-400">
                 <Bot className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-white">Lukas Crypto Support</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="text-xl font-bold text-white">Lukas Financial Support</h3>
+              <p className="text-xs text-[#848e9c] leading-relaxed">
                 Our support engineers monitor non-custodial transactions, bot contracts, and options settlements 24 hours a day, 7 days a week.
               </p>
 
               <div className="space-y-3 pt-2 text-xs font-mono">
                 <div className="flex items-center gap-2 text-slate-300">
-                  <Mail className="w-4 h-4 text-sky-400" />
-                  <span>support@lukascrypto.com</span>
+                  <Mail className="w-4 h-4 text-[#f0b90b]" />
+                  <span>support@lukasfinancial.com</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4 text-[#0ecb81]" />
                   <span>100% Non-Custodial Encrypted Channel</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 text-[11px] text-slate-400">
-              Response SLA: Typical response time is under 1 hour for active contract holders.
+            <div className="p-4 bg-[#0b0e11] rounded border border-[#2b313a] text-[11px] text-[#848e9c]">
+              Response SLA: Typical response time is under 1 hour for active traders.
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-slate-800 py-8 text-center text-xs text-slate-500 font-mono">
-        © {new Date().getFullYear()} Lukas Crypto Management. All rights reserved.
+      <footer className="border-t border-[#2b313a] py-6 text-center text-xs text-[#848e9c] font-mono">
+        © {new Date().getFullYear()} Lukas Financial Ltd. All rights reserved.
       </footer>
     </div>
   );

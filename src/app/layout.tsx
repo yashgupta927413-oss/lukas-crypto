@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Lukas Crypto Management - AI Bot Investment & Options Trading Platform",
-  description: "High-frequency algorithmic trading bots and 1m/5m binary options platform.",
+  title: "Lukas Financial | Digital Asset Options & Yield Platform",
+  description: "Institutional digital asset options trading desk and structured quantitative yield vaults.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="antialiased bg-slate-950 text-slate-100 min-h-screen">
+      <body className="antialiased bg-[#0b0e11] text-[#eaecef] min-h-screen">
         <Providers>{children}</Providers>
       </body>
     </html>

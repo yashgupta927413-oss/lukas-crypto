@@ -55,29 +55,29 @@ function baseTemplate(title: string, bodyHtml: string): string {
         <table width="600" cellpadding="0" cellspacing="0" style="background-color:#1e293b;border-radius:16px;border:1px solid #334155;overflow:hidden;">
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#0ea5e9,#6366f1);padding:32px 40px;text-align:center;">
+            <td style="background-color:#0b0e11;padding:32px 40px;text-align:center;border-bottom:1px solid #2b313a;">
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900;letter-spacing:-0.5px;">
-                LUKAS <span style="color:#bae6fd;">CRYPTO</span>
+                LUKAS <span style="color:#f0b90b;">FINANCIAL</span>
               </h1>
-              <p style="margin:4px 0 0;color:#bae6fd;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;">
-                MANAGEMENT PLATFORM
+              <p style="margin:4px 0 0;color:#848e9c;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">
+                INSTITUTIONAL EXCHANGE DESK
               </p>
             </td>
           </tr>
           <!-- Body -->
           <tr>
-            <td style="padding:40px;">
+            <td style="padding:40px;background-color:#181a20;color:#eaecef;">
               ${bodyHtml}
             </td>
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="padding:24px 40px;border-top:1px solid #334155;text-align:center;">
-              <p style="margin:0;color:#64748b;font-size:11px;">
-                © ${new Date().getFullYear()} Lukas Crypto Management. All rights reserved.
+            <td style="padding:24px 40px;border-top:1px solid #2b313a;text-align:center;background-color:#0b0e11;">
+              <p style="margin:0;color:#848e9c;font-size:11px;">
+                © ${new Date().getFullYear()} Lukas Financial Ltd. All rights reserved.
               </p>
-              <p style="margin:6px 0 0;color:#475569;font-size:10px;">
-                AI Bot Investment & Binary Options Trading Platform
+              <p style="margin:6px 0 0;color:#848e9c;font-size:10px;">
+                Digital Asset Options & Yield Vaults Platform
               </p>
             </td>
           </tr>

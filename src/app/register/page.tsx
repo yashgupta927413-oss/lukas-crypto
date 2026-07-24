@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Bot, Lock, Mail, ArrowRight, Gift } from "lucide-react";
+import { Lock, Mail, ArrowRight, Gift } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,85 +51,82 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="w-full max-w-md glass-panel border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10">
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center mx-auto mb-3 shadow-xl shadow-sky-500/20">
-            <Bot className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Join Lukas Crypto Management</h1>
-          <p className="text-xs text-slate-400 mt-1">Get instant access to $100 Free Trial Credit</p>
+    <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="w-full max-w-md bg-[#181a20] border border-[#2b313a] rounded-lg p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="text-center space-y-2">
+          <Link href="/" className="inline-flex items-center gap-2 group mb-2">
+            <div className="w-8 h-8 rounded bg-[#f0b90b] text-[#0b0e11] font-black text-lg flex items-center justify-center">
+              L
+            </div>
+            <span className="text-white font-bold text-lg tracking-tight">
+              LUKAS <span className="text-[#f0b90b]">FINANCIAL</span>
+            </span>
+          </Link>
+          <h1 className="text-xl font-bold text-white tracking-tight">Create Trader Account</h1>
+          <p className="text-xs text-[#848e9c]">Instant access to options desk & yield vaults</p>
         </div>
 
         {/* Free Trial Banner */}
-        <div className="mb-6 p-3 bg-gradient-to-r from-emerald-500/10 to-sky-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-            <Gift className="w-5 h-5 animate-bounce" />
+        <div className="p-3 bg-[#0ecb81]/10 border border-[#0ecb81]/30 rounded flex items-center gap-3 font-mono">
+          <div className="w-8 h-8 rounded bg-[#0ecb81]/20 flex items-center justify-center text-[#0ecb81] font-bold text-sm shrink-0">
+            🎁
           </div>
           <div>
-            <span className="text-xs font-bold text-emerald-400 block">$100 Free Trial Included</span>
-            <span className="text-[10px] text-slate-300">
-              Allocated automatically upon sign-up for AI Bot Trading
+            <span className="text-xs font-bold text-[#0ecb81] block">$100 Welcome Credit Included</span>
+            <span className="text-[10px] text-slate-300 font-sans">
+              Credited automatically to your vault account upon registration
             </span>
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium text-center">
+          <div className="p-3 rounded bg-[#f6465d]/10 border border-[#f6465d]/30 text-[#f6465d] text-xs font-semibold text-center font-mono">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Email Address
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs text-[#848e9c] block font-sans">Email Address</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-[#848e9c] absolute left-3 top-3" />
               <input
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white outline-none transition"
-                required
+                className="w-full bg-[#0b0e11] border border-[#2b313a] rounded pl-9 pr-3 py-2 text-xs font-mono text-white outline-none focus:border-[#f0b90b]"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Password
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs text-[#848e9c] block font-sans">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-[#848e9c] absolute left-3 top-3" />
               <input
                 type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white outline-none transition"
-                required
+                placeholder="••••••••"
+                className="w-full bg-[#0b0e11] border border-[#2b313a] rounded pl-9 pr-3 py-2 text-xs font-mono text-white outline-none focus:border-[#f0b90b]"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Confirm Password
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs text-[#848e9c] block font-sans">Confirm Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-[#848e9c] absolute left-3 top-3" />
               <input
                 type="password"
+                required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat password"
-                className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white outline-none transition"
-                required
+                placeholder="••••••••"
+                className="w-full bg-[#0b0e11] border border-[#2b313a] rounded pl-9 pr-3 py-2 text-xs font-mono text-white outline-none focus:border-[#f0b90b]"
               />
             </div>
           </div>
@@ -137,17 +134,17 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-sky-500/20 transition flex items-center justify-center gap-2 group disabled:opacity-50"
+            className="w-full py-3 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e11] font-bold rounded text-xs transition-colors flex items-center justify-center gap-2"
           >
-            <span>{loading ? "Creating Account..." : "Register & Claim $100 Trial"}</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span>{loading ? "Creating Account..." : "Create Account"}</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-400">
-          Already have an account?{" "}
-          <Link href="/login" className="text-sky-400 hover:underline font-semibold">
-            Sign In
+        <div className="text-center pt-2 border-t border-[#2b313a] text-xs text-[#848e9c]">
+          Already registered?{" "}
+          <Link href="/login" className="text-[#f0b90b] font-bold hover:underline">
+            Log In
           </Link>
         </div>
       </div>
