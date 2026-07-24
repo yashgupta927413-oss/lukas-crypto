@@ -68,17 +68,17 @@ export default function HomePage() {
               Execute 1-minute to 15-minute binary option contracts with 75% fixed payouts, or lock digital assets in structured quantitative yield vaults.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <Link
                 href="/options"
-                className="px-6 py-3 rounded text-xs font-bold bg-[#f0b90b] text-[#0b0e11] hover:bg-[#d97706] transition-colors shadow flex items-center gap-2"
+                className="px-6 py-3 rounded text-xs font-bold bg-[#f0b90b] text-[#0b0e11] hover:bg-[#d97706] transition-colors shadow flex items-center justify-center gap-2"
               >
                 <span>Trade Options</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/bots"
-                className="px-6 py-3 rounded text-xs font-semibold bg-[#181a20] text-white hover:bg-[#1e2329] border border-[#2b313a] transition-colors"
+                className="px-6 py-3 rounded text-xs font-semibold bg-[#181a20] text-white hover:bg-[#1e2329] border border-[#2b313a] transition-colors text-center"
               >
                 <span>Earn Vaults</span>
               </Link>

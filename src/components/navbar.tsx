@@ -259,19 +259,70 @@ export default function Navbar() {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-[#2b313a] bg-[#0b0e11] px-4 py-3 space-y-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`block p-2 rounded text-xs font-semibold ${
-                pathname === link.href ? "bg-[#181a20] text-[#f0b90b]" : "text-[#848e9c]"
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
+        <div className="md:hidden border-t border-[#2b313a] bg-[#0b0e11] px-4 py-4 space-y-3 font-sans animate-in slide-in-from-top-2">
+          {session && (
+            <div className="p-3 bg-[#181a20] rounded border border-[#2b313a] space-y-2 font-mono text-xs">
+              <div className="flex justify-between text-[#848e9c]">
+                <span>Portfolio Balance:</span>
+                <span className="text-[#f0b90b] font-bold">${totalBalance.toFixed(2)}</span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsTransferModalOpen(true);
+                }}
+                className="w-full py-1.5 bg-[#2b313a] text-white rounded text-xs font-bold font-sans flex items-center justify-center gap-1.5"
+              >
+                <ArrowRightLeft className="w-3.5 h-3.5 text-[#f0b90b]" />
+                <span>Transfer Funds</span>
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block py-2.5 px-3 rounded-lg text-sm font-bold transition-colors ${
+                  pathname === link.href ? "bg-[#181a20] text-[#f0b90b]" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
+
+          {session ? (
+            <div className="pt-2 border-t border-[#2b313a] flex justify-between items-center text-xs">
+              <span className="text-[#848e9c] font-mono truncate max-w-[180px]">{session.user?.email}</span>
+              <button
+                onClick={() => signOut()}
+                className="text-[#f6465d] font-bold hover:underline flex items-center gap-1"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="pt-2 border-t border-[#2b313a] grid grid-cols-2 gap-2">
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="py-2.5 text-center rounded text-xs font-bold text-white bg-[#1e2329] border border-[#2b313a]"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="py-2.5 text-center rounded text-xs font-bold bg-[#f0b90b] text-[#0b0e11]"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

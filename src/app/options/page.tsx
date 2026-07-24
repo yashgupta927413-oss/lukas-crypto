@@ -236,15 +236,15 @@ export default function OptionsPage() {
 
       <main className="flex-1 max-w-[1650px] w-full mx-auto px-3 sm:px-6 py-4 space-y-3">
         {/* Ticker Header Bar */}
-        <div className="bg-[#12161f] border border-[#263044] rounded-lg p-3 flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
-          <div className="flex items-center gap-4 flex-wrap">
+        <div className="bg-[#12161f] border border-[#263044] rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
             {/* Asset Selector */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-1.5 shrink-0">
               {assets.map((asset) => (
                 <button
                   key={asset.symbol}
                   onClick={() => setSelectedAsset(asset.symbol)}
-                  className={`px-3 py-1.5 rounded font-sans text-xs font-bold transition-all ${
+                  className={`px-2.5 py-1.5 rounded font-sans text-xs font-bold transition-all shrink-0 ${
                     selectedAsset === asset.symbol
                       ? "bg-[#263044] text-[#f0b90b] shadow"
                       : "text-[#848e9c] hover:text-white hover:bg-[#181e2a]"
@@ -254,42 +254,35 @@ export default function OptionsPage() {
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Live Stats */}
-            <div className="flex items-center gap-6 border-l border-[#263044] pl-4">
+          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#263044] pt-2 sm:pt-0 font-mono">
+            <div className="flex items-center gap-4">
               <div>
-                <span className="text-[#848e9c] font-sans text-[10px] block uppercase">Spot Price</span>
-                <span className="text-white font-bold text-sm">${livePrice.toFixed(2)}</span>
+                <span className="text-[#848e9c] font-sans text-[9px] sm:text-[10px] block uppercase">Spot Price</span>
+                <span className="text-white font-bold text-xs sm:text-sm">${livePrice.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-[#848e9c] font-sans text-[10px] block uppercase">24h Change</span>
-                <span className={`font-bold ${isUp ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
+                <span className="text-[#848e9c] font-sans text-[9px] sm:text-[10px] block uppercase">24h Change</span>
+                <span className={`font-bold text-xs sm:text-sm ${isUp ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
                   {isUp ? "+" : ""}{price24hChange}%
                 </span>
               </div>
-              <div className="hidden sm:block">
-                <span className="text-[#848e9c] font-sans text-[10px] block uppercase">24h High</span>
-                <span className="text-slate-300 font-semibold">${(livePrice * 1.021).toFixed(2)}</span>
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-[#848e9c] font-sans text-[10px] block uppercase">24h Low</span>
-                <span className="text-slate-300 font-semibold">${(livePrice * 0.982).toFixed(2)}</span>
-              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <div className="bg-[#0b0e11] px-3 py-1.5 rounded border border-[#263044]">
-              <span className="text-[#848e9c] font-sans">Options Wallet: </span>
-              <span className="text-[#0ecb81] font-bold">${personalBalance.toFixed(2)}</span>
+            <div className="flex items-center gap-2">
+              <div className="bg-[#0b0e11] px-2.5 py-1 rounded border border-[#263044] text-[11px]">
+                <span className="text-[#848e9c] font-sans">Wallet: </span>
+                <span className="text-[#0ecb81] font-bold">${personalBalance.toFixed(2)}</span>
+              </div>
+              <button
+                onClick={() => setIsTransferModalOpen(true)}
+                className="px-2.5 py-1 bg-[#263044] hover:bg-[#323e57] text-white rounded font-sans text-xs font-bold transition-colors flex items-center gap-1"
+              >
+                <ArrowRightLeft className="w-3 h-3 text-[#f0b90b]" />
+                <span className="hidden sm:inline">Transfer</span>
+              </button>
             </div>
-            <button
-              onClick={() => setIsTransferModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#263044] hover:bg-[#323e57] text-white rounded font-sans text-xs font-bold transition-colors"
-            >
-              <ArrowRightLeft className="w-3.5 h-3.5 text-[#f0b90b]" />
-              <span>Transfer</span>
-            </button>
           </div>
         </div>
 
