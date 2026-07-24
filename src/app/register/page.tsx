@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Mail, ArrowRight, Gift } from "lucide-react";
+import BrandLogo from "@/components/brand-logo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -54,14 +55,9 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <div className="w-full max-w-md bg-[#181a20] border border-[#2b313a] rounded-lg p-6 sm:p-8 shadow-2xl space-y-6">
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2 group mb-2">
-            <div className="w-8 h-8 rounded bg-[#f0b90b] text-[#0b0e11] font-black text-lg flex items-center justify-center">
-              L
-            </div>
-            <span className="text-white font-bold text-lg tracking-tight">
-              LUKAS <span className="text-[#f0b90b]">FINANCIAL</span>
-            </span>
-          </Link>
+          <div className="flex justify-center mb-2">
+            <BrandLogo size="lg" />
+          </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Create Trader Account</h1>
           <p className="text-xs text-[#848e9c]">Instant access to options desk & yield vaults</p>
         </div>

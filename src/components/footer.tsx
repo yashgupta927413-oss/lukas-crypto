@@ -1,20 +1,16 @@
 import Link from "next/link";
+import BrandLogo from "./brand-logo";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#07090b] border-t border-[#2b313a] text-[#848e9c] text-xs py-10 px-4 sm:px-6 lg:px-8">
+    <footer className="w-full bg-[#07090b] border-t border-[#2b313a] text-[#848e9c] text-xs py-10 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-[1600px] mx-auto space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[#f0b90b] text-[#0b0e11] font-black text-xs flex items-center justify-center">
-                L
-              </div>
-              <span className="text-white font-bold text-sm">LUKAS EXCHANGE</span>
-            </div>
+            <BrandLogo size="sm" />
             <p className="text-[#848e9c] leading-relaxed text-[11px]">
-              Digital asset trading platform for options and structured yield products. Sourced directly from spot orderbook data feeds.
+              Institutional digital asset options trading desk and structured quantitative yield vaults. Sourced directly from live spot orderbook data feeds.
             </p>
           </div>
 
@@ -49,7 +45,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-6 border-t border-[#2b313a] flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-[#848e9c] font-mono">
-          <div>© {new Date().getFullYear()} Lukas Exchange Ltd. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Lukas Financial Ltd. All rights reserved.</div>
           <div>Powered by Binance Market API</div>
         </div>
       </div>

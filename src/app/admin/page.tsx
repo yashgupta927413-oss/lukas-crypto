@@ -79,7 +79,7 @@ export default function AdminPage() {
     smtpUser: "",
     smtpPass: "",
     smtpFromEmail: "",
-    smtpFromName: "Lukas Crypto Management",
+    smtpFromName: "Lukas Financial",
     smtpEnabled: false,
   });
   const [testEmailAddr, setTestEmailAddr] = useState("");
@@ -122,7 +122,7 @@ export default function AdminPage() {
             smtpUser: data.config.smtpUser || "",
             smtpPass: data.config.smtpPass || "",
             smtpFromEmail: data.config.smtpFromEmail || "",
-            smtpFromName: data.config.smtpFromName || "Lukas Crypto Management",
+            smtpFromName: data.config.smtpFromName || "Lukas Financial",
             smtpEnabled: data.config.smtpEnabled || false,
           });
           setGatewayForm({
