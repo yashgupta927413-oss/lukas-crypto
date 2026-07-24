@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import LiveTradingChart from "@/components/live-trading-chart";
 import LiveOrderbook from "@/components/live-orderbook";
+import LiveTradesStream from "@/components/live-trades-stream";
 import Footer from "@/components/footer";
 import {
   TrendingUp,
@@ -41,6 +42,7 @@ export default function OptionsPage() {
   const [nowTime, setNowTime] = useState<number>(Date.now());
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"POSITIONS" | "HISTORY" | "ORDERBOOK">("POSITIONS");
+  const [rightDrawerTab, setRightDrawerTab] = useState<"ORDERBOOK" | "TRADES">("ORDERBOOK");
 
   const assets = [
     { symbol: "BTCUSDT", name: "Bitcoin", pair: "BTC/USDT" },
@@ -563,9 +565,32 @@ export default function OptionsPage() {
               </div>
             </div>
 
-            {/* Desktop Live Order Book Drawer */}
-            <div className="hidden lg:block">
-              <LiveOrderbook symbol={selectedAsset} livePrice={livePrice} />
+            {/* Desktop Live Order Book & Executed Trades Drawer */}
+            <div className="hidden lg:block space-y-2">
+              <div className="flex items-center gap-1 bg-[#12161f] border border-[#263044] p-1 rounded-lg text-xs font-mono">
+                <button
+                  onClick={() => setRightDrawerTab("ORDERBOOK")}
+                  className={`flex-1 py-1.5 rounded font-sans text-[11px] font-bold text-center transition-all ${
+                    rightDrawerTab === "ORDERBOOK" ? "bg-[#263044] text-[#f0b90b]" : "text-[#848e9c] hover:text-white"
+                  }`}
+                >
+                  Order Book
+                </button>
+                <button
+                  onClick={() => setRightDrawerTab("TRADES")}
+                  className={`flex-1 py-1.5 rounded font-sans text-[11px] font-bold text-center transition-all ${
+                    rightDrawerTab === "TRADES" ? "bg-[#263044] text-[#f0b90b]" : "text-[#848e9c] hover:text-white"
+                  }`}
+                >
+                  Recent Trades
+                </button>
+              </div>
+
+              {rightDrawerTab === "ORDERBOOK" ? (
+                <LiveOrderbook symbol={selectedAsset} livePrice={livePrice} />
+              ) : (
+                <LiveTradesStream symbol={selectedAsset} livePrice={livePrice} />
+              )}
             </div>
           </div>
         </div>

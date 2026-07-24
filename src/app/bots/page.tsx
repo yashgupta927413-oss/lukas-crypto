@@ -36,6 +36,8 @@ export default function BotsPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [expandedContractId, setExpandedContractId] = useState<string | null>(null);
+  const [calcAmount, setCalcAmount] = useState<number>(1000);
+  const [calcDays, setCalcDays] = useState<number>(90);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -167,6 +169,57 @@ export default function BotsPage() {
             <span>{successMsg}</span>
           </div>
         )}
+
+        {/* Interactive Yield Estimator Calculator */}
+        <div className="bg-[#12161f] border border-[#263044] rounded-lg p-5 space-y-4 font-mono text-xs">
+          <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider font-sans">Yield Estimator Calculator</h3>
+            <span className="text-[#0ecb81] font-bold">Compounding Projections</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            {/* Input 1: Principal Amount */}
+            <div className="space-y-1.5">
+              <label className="text-[#848e9c] font-sans block">Investment Principal (USDT)</label>
+              <input
+                type="number"
+                value={calcAmount}
+                onChange={(e) => setCalcAmount(Math.max(100, parseFloat(e.target.value) || 0))}
+                className="w-full bg-[#0b0e11] border border-[#263044] rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-[#f0b90b]"
+              />
+            </div>
+
+            {/* Input 2: Lock Term */}
+            <div className="space-y-1.5">
+              <label className="text-[#848e9c] font-sans block">Lock Duration</label>
+              <div className="grid grid-cols-4 gap-1">
+                {[30, 90, 180, 365].map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setCalcDays(d)}
+                    className={`py-2 rounded font-bold text-xs transition-colors ${
+                      calcDays === d ? "bg-[#f0b90b] text-[#0b0e11]" : "bg-[#0b0e11] text-[#848e9c] hover:text-white border border-[#263044]"
+                    }`}
+                  >
+                    {d}D
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Output: Estimated Earnings */}
+            <div className="bg-[#0b0e11] p-3 rounded border border-[#263044] space-y-1">
+              <div className="flex justify-between text-[#848e9c] text-[11px]">
+                <span>Projected ROI ({calcDays === 30 ? "15%" : calcDays === 90 ? "45%" : calcDays === 180 ? "95%" : "220%"}):</span>
+                <span className="text-[#0ecb81] font-bold">+${(calcAmount * (calcDays === 30 ? 0.15 : calcDays === 90 ? 0.45 : calcDays === 180 ? 0.95 : 2.2)).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-white text-sm font-bold pt-1 border-t border-[#263044]">
+                <span>Total Maturity Payout:</span>
+                <span className="text-[#f0b90b]">${(calcAmount * (1 + (calcDays === 30 ? 0.15 : calcDays === 90 ? 0.45 : calcDays === 180 ? 0.95 : 2.2))).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* VAULT TIERS GRID */}
         <div className="space-y-3">

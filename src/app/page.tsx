@@ -249,6 +249,42 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* FREQUENTLY ASKED QUESTIONS */}
+      <section className="py-14 px-4 sm:px-6 lg:px-8 border-b border-[#2b313a] bg-[#07090b]">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-white">Frequently Asked Questions</h2>
+            <p className="text-xs text-[#848e9c]">Everything you need to know about trading options and yield vaults.</p>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                q: "How are option contracts settled?",
+                a: "Contracts settle automatically based on the exact Binance spot index price at expiration. If the settlement price is in your chosen direction by even $0.01, you win a 75% profit payout.",
+              },
+              {
+                q: "How does the $100 Welcome Bonus work?",
+                a: "Every newly registered trader receives a $100 Welcome Bonus credit which can be combined with a $400 top-up to activate a $500 Minimum Yield Vault.",
+              },
+              {
+                q: "Are deposits and withdrawals automated?",
+                a: "Yes. Crypto deposits are processed instantly via automated NOWPayments gateway webhooks, crediting your Holding Account within seconds.",
+              },
+              {
+                q: "How do segregated accounts work?",
+                a: "Your capital is separated into 3 dedicated balances (Holding, Earn Vaults, Options Trading). You can transfer funds instantly between accounts with zero fees.",
+              },
+            ].map((faq, idx) => (
+              <div key={idx} className="bg-[#181a20] border border-[#2b313a] rounded-lg p-4 space-y-2">
+                <h4 className="text-sm font-bold text-white font-sans">{faq.q}</h4>
+                <p className="text-xs text-[#848e9c] leading-relaxed font-sans">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
