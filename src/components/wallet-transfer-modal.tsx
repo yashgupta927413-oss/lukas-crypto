@@ -74,7 +74,7 @@ export default function WalletTransferModal({
       setTimeout(() => {
         setSuccessMsg(null);
         onClose();
-      }, 1500);
+      }, 1200);
     } catch (err: any) {
       setError(err.message || "Failed to transfer funds");
     } finally {
@@ -83,116 +83,132 @@ export default function WalletTransferModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="w-full max-w-md glass-panel border border-slate-800 rounded-3xl p-6 shadow-2xl relative animate-in zoom-in-95">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white transition"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0b0e11]/80 backdrop-blur-sm">
+      <div className="w-full max-w-md bg-[#181a20] border border-[#2b313a] rounded-lg p-5 sm:p-6 shadow-2xl relative animate-in zoom-in-95 font-sans space-y-4">
+        <div className="flex justify-between items-center pb-2 border-b border-[#2b313a]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded bg-[#f0b90b]/10 text-[#f0b90b] flex items-center justify-center border border-[#f0b90b]/30">
+              <ArrowRightLeft className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Instant Wallet Transfer</h3>
+              <p className="text-[11px] text-[#848e9c]">Move capital between segregated balances</p>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-sky-500/20 flex items-center justify-center text-sky-400">
-            <ArrowRightLeft className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Wallet Transfer</h3>
-            <p className="text-xs text-slate-400">Move funds between your Holding & Trading wallets</p>
-          </div>
+          <button
+            onClick={onClose}
+            className="text-[#848e9c] hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+          <div className="p-2.5 rounded bg-[#f6465d]/10 border border-[#f6465d]/30 text-[#f6465d] text-xs flex items-center gap-2 font-mono">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
+          <div className="p-2.5 rounded bg-[#0ecb81]/10 border border-[#0ecb81]/30 text-[#0ecb81] text-xs flex items-center gap-2 font-mono">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleTransfer} className="space-y-4">
+        <form onSubmit={handleTransfer} className="space-y-4 font-mono text-xs">
           {/* Direction Toggle */}
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-2">
-              Transfer Direction
+          <div className="space-y-1.5 font-sans">
+            <label className="text-xs text-[#848e9c] block">
+              Transfer Route
             </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#0b0e11] rounded border border-[#2b313a]">
               <button
                 type="button"
                 onClick={() => setDirection("HOLDING_TO_PERSONAL")}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition ${
+                className={`py-2 px-2 rounded text-[11px] font-bold transition-all ${
                   direction === "HOLDING_TO_PERSONAL"
-                    ? "bg-sky-500 text-slate-950 shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#263044] text-[#f0b90b] shadow"
+                    : "text-[#848e9c] hover:text-white"
                 }`}
               >
-                Holding → Personal
+                Holding → Options Desk
               </button>
               <button
                 type="button"
                 onClick={() => setDirection("PERSONAL_TO_HOLDING")}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold transition ${
+                className={`py-2 px-2 rounded text-[11px] font-bold transition-all ${
                   direction === "PERSONAL_TO_HOLDING"
-                    ? "bg-sky-500 text-slate-950 shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#263044] text-[#f0b90b] shadow"
+                    : "text-[#848e9c] hover:text-white"
                 }`}
               >
-                Personal → Holding
+                Options Desk → Holding
               </button>
-            </div>
-          </div>
-
-          {/* Source / Target Wallet Visual */}
-          <div className="p-3 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs space-y-2">
-            <div className="flex justify-between text-slate-400">
-              <span>Source Balance:</span>
-              <span className="font-mono text-white font-semibold">
-                ${availableMax.toFixed(2)}
-              </span>
-            </div>
-            <div className="text-[10px] text-slate-400 bg-slate-950/50 p-2 rounded-xl">
-              {direction === "HOLDING_TO_PERSONAL"
-                ? "Moving unencumbered Holding Wallet funds to Personal Trading Wallet for 5-Minute Binary Options trading."
-                : "Moving free trading profits from Personal Trading Wallet back to main Holding Wallet."}
             </div>
           </div>
 
           {/* Amount Input */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="text-xs font-semibold text-slate-300">Transfer Amount ($)</label>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-xs font-sans">
+              <label className="text-[#848e9c]">Transfer Amount ($)</label>
               <button
                 type="button"
                 onClick={() => setAmount(availableMax.toString())}
-                className="text-[10px] text-sky-400 hover:underline font-semibold"
+                className="text-[#f0b90b] font-bold hover:underline"
               >
-                MAX (${availableMax.toFixed(2)})
+                Max: ${availableMax.toFixed(2)}
               </button>
             </div>
+
             <input
               type="number"
               step="any"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-2.5 text-sm font-mono text-white outline-none transition"
-              required
+              className="w-full bg-[#0b0e11] border border-[#2b313a] rounded px-3 py-2 text-sm text-white font-bold outline-none focus:border-[#f0b90b]"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-sky-500/20 transition disabled:opacity-50"
-          >
-            {loading ? "Processing Transfer..." : "Confirm Wallet Transfer"}
-          </button>
+          {/* Summary Box */}
+          <div className="p-3 bg-[#0b0e11] rounded border border-[#2b313a] space-y-1 text-xs">
+            <div className="flex justify-between text-[#848e9c]">
+              <span>Source Account:</span>
+              <span className="text-white font-bold">
+                {direction === "HOLDING_TO_PERSONAL" ? "Holding Wallet" : "Options Trading Wallet"}
+              </span>
+            </div>
+            <div className="flex justify-between text-[#848e9c]">
+              <span>Destination:</span>
+              <span className="text-[#0ecb81] font-bold">
+                {direction === "HOLDING_TO_PERSONAL" ? "Options Trading Wallet" : "Holding Wallet"}
+              </span>
+            </div>
+            <div className="flex justify-between text-[#848e9c]">
+              <span>Transfer Fee:</span>
+              <span className="text-[#0ecb81] font-bold">$0.00 (Zero Fee)</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-1 font-sans">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-1/2 py-2.5 bg-[#181a20] hover:bg-[#2b313a] text-white font-bold rounded text-xs border border-[#2b313a]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-1/2 py-2.5 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e11] font-bold rounded text-xs"
+            >
+              {loading ? "Transferring..." : "Confirm Transfer"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

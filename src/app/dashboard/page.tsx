@@ -205,28 +205,28 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-3 sm:flex items-center gap-2.5 font-sans">
             <button
               onClick={() => setShowDepositModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e11] font-bold text-xs rounded transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e11] font-bold text-xs rounded transition-colors"
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-3.5 h-3.5" />
               <span>Deposit</span>
             </button>
 
             <button
               onClick={() => setShowWithdrawModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#1e2329] hover:bg-[#2b313a] text-white font-semibold text-xs rounded border border-[#2b313a] transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-[#1e2329] hover:bg-[#2b313a] text-white font-semibold text-xs rounded border border-[#2b313a] transition-colors"
             >
-              <MinusCircle className="w-4 h-4" />
+              <MinusCircle className="w-3.5 h-3.5" />
               <span>Withdraw</span>
             </button>
 
             <button
               onClick={() => setIsTransferModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e11] font-bold text-xs rounded transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-[#f0b90b] hover:bg-[#d97706] text-[#0b0e11] font-bold text-xs rounded transition-colors"
             >
-              <ArrowRightLeft className="w-4 h-4" />
+              <ArrowRightLeft className="w-3.5 h-3.5" />
               <span>Transfer</span>
             </button>
           </div>
