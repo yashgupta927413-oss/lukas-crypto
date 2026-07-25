@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/navbar";
 import LiveTradingChart from "@/components/live-trading-chart";
 import LiveOrderbook from "@/components/live-orderbook";
@@ -125,6 +125,7 @@ export default function OptionsPage() {
   };
 
   const [allMarketPrices, setAllMarketPrices] = useState<Record<string, number>>({});
+  const isSettlingRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     fetchTradesAndWallet();
@@ -138,12 +139,20 @@ export default function OptionsPage() {
       (t) => t.status === "PENDING" && new Date(t.expiresAt).getTime() <= nowTime
     );
 
-    if (expiredPending) {
+    if (expiredPending && !isSettlingRef.current.has(expiredPending.id)) {
+      isSettlingRef.current.add(expiredPending.id);
+
       fetch("/api/options", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tradeId: expiredPending.id }),
-      }).then(() => fetchTradesAndWallet());
+      })
+        .then(() => fetchTradesAndWallet())
+        .finally(() => {
+          setTimeout(() => {
+            isSettlingRef.current.delete(expiredPending.id);
+          }, 3000);
+        });
     }
   }, [nowTime, trades]);
 

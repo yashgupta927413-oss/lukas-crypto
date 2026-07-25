@@ -28,10 +28,23 @@ export async function getUserOptionTrades(userId: string) {
     }
 
     for (const trade of expired) {
-      const livePrice = prices[trade.symbol];
-      if (livePrice && livePrice > 0) {
-        await settleTrade(trade.id, livePrice);
+      let livePrice = prices[trade.symbol];
+
+      if (!livePrice || livePrice <= 0) {
+        try {
+          const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${trade.symbol}`);
+          if (res.ok) {
+            const data = await res.json();
+            livePrice = parseFloat(data.price);
+          }
+        } catch (e) {
+          console.error("Single symbol price fallback error", e);
+        }
       }
+
+      // Guarantee trade settles and never gets stuck
+      const finalSettlementPrice = (livePrice && livePrice > 0) ? livePrice : Number(trade.strikePrice);
+      await settleTrade(trade.id, finalSettlementPrice);
     }
   }
 
@@ -224,11 +237,19 @@ export async function autoSettleExpiredTrades(symbolPrices: Record<string, numbe
   const settled = [];
 
   for (const trade of expiredTrades) {
-    const livePrice = symbolPrices[trade.symbol];
-    if (livePrice && livePrice > 0) {
-      const result = await settleTrade(trade.id, livePrice);
-      if (result) settled.push(result);
+    let livePrice = symbolPrices[trade.symbol];
+    if (!livePrice || livePrice <= 0) {
+      try {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${trade.symbol}`);
+        if (res.ok) {
+          const data = await res.json();
+          livePrice = parseFloat(data.price);
+        }
+      } catch (e) {}
     }
+    const finalPrice = (livePrice && livePrice > 0) ? livePrice : Number(trade.strikePrice);
+    const result = await settleTrade(trade.id, finalPrice);
+    if (result) settled.push(result);
   }
 
   return settled;
