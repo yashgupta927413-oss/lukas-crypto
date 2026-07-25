@@ -113,11 +113,18 @@ export default function OptionsPage() {
         if (pData[selectedAsset]?.change24h) {
           setPrice24hChange(pData[selectedAsset].change24h);
         }
+        const extracted: Record<string, number> = {};
+        for (const k in pData) {
+          if (pData[k]?.price) extracted[k] = pData[k].price;
+        }
+        setAllMarketPrices(extracted);
       }
     } catch (e) {
       console.error("Options page fetch error", e);
     }
   };
+
+  const [allMarketPrices, setAllMarketPrices] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchTradesAndWallet();
@@ -131,14 +138,14 @@ export default function OptionsPage() {
       (t) => t.status === "PENDING" && new Date(t.expiresAt).getTime() <= nowTime
     );
 
-    if (expiredPending && livePrice > 0) {
+    if (expiredPending) {
       fetch("/api/options", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbolPrices: { [expiredPending.symbol]: livePrice } }),
+        body: JSON.stringify({ tradeId: expiredPending.id }),
       }).then(() => fetchTradesAndWallet());
     }
-  }, [nowTime, trades, livePrice]);
+  }, [nowTime, trades]);
 
   const handleExecuteTrade = async (direction: "CALL" | "PUT") => {
     if (!session) {
@@ -211,16 +218,18 @@ export default function OptionsPage() {
     return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
-  // Helper to determine live PnL status
+  // Helper to determine live PnL status using trade's symbol price
   const getTradeLiveStatus = (trade: any) => {
     const strike = Number(trade.strikePrice);
-    if (livePrice === strike) return { label: "STRIKE MATCH", color: "text-[#38bdf8] bg-[#38bdf8]/10 border-[#38bdf8]/30" };
+    const currentPrice = trade.symbol === selectedAsset ? livePrice : (allMarketPrices[trade.symbol] || strike);
+
+    if (currentPrice === strike) return { label: "STRIKE MATCH", color: "text-[#38bdf8] bg-[#38bdf8]/10 border-[#38bdf8]/30" };
     if (trade.direction === "CALL") {
-      return livePrice > strike
+      return currentPrice > strike
         ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
         : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
     } else {
-      return livePrice < strike
+      return currentPrice < strike
         ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
         : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
     }

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import {
   getUserOptionTrades,
   createOptionTrade,
-  autoSettleExpiredTrades,
+  settleTrade,
 } from "@/services/optionsService";
 
 export async function GET() {
@@ -68,14 +69,43 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { symbolPrices } = body; // e.g. { BTCUSDT: 95000, ETHUSDT: 2700 }
+    const { tradeId } = body;
 
-    if (!symbolPrices || typeof symbolPrices !== "object") {
-      return NextResponse.json({ error: "Invalid symbolPrices" }, { status: 400 });
+    if (tradeId) {
+      const trade = await prisma.optionTrade.findUnique({ where: { id: tradeId } });
+      if (!trade || trade.status !== "PENDING") {
+        return NextResponse.json({ error: "Trade not found or already settled" }, { status: 400 });
+      }
+
+      // ALWAYS fetch the exact Binance spot price for trade.symbol (e.g. BTCUSDT) directly from Binance
+      let livePrice = 0;
+      try {
+        const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${trade.symbol}`);
+        if (priceRes.ok) {
+          const data = await priceRes.json();
+          livePrice = parseFloat(data.price);
+        }
+      } catch (e) {
+        console.error(`Binance price fetch error for ${trade.symbol}`, e);
+      }
+
+      if (!livePrice || livePrice <= 0) {
+        return NextResponse.json({ error: `Could not fetch spot price for ${trade.symbol}` }, { status: 400 });
+      }
+
+      const settled = await settleTrade(tradeId, livePrice);
+      return NextResponse.json({ settled });
     }
 
-    const settled = await autoSettleExpiredTrades(symbolPrices);
-    return NextResponse.json({ settledCount: settled.length, settled });
+    // Auto-settle all pending expired trades for session user
+    const session = await getServerSession(authOptions);
+    if (session?.user) {
+      const userId = (session.user as any).id;
+      const trades = await getUserOptionTrades(userId);
+      return NextResponse.json({ trades });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
