@@ -322,6 +322,10 @@ export default function OptionsPage() {
             <LiveTradingChart
               symbol={selectedAsset}
               livePrice={livePrice}
+              activeStrikePrice={latestPendingTrade ? Number(latestPendingTrade.strikePrice) : null}
+              activeDirection={latestPendingTrade ? latestPendingTrade.direction : null}
+              remainingTimer={latestPendingTrade ? formatTimer(latestPendingTrade.expiresAt) : null}
+              liveStatus={latestPendingTrade ? getTradeLiveStatus(latestPendingTrade) : null}
             />
 
             {/* Bottom Tabs: Positions, History, Order Book */}

@@ -42,6 +42,25 @@ export async function getGlobalConfig() {
 }
 
 export async function getUserBotContracts(userId: string) {
+  // Auto-settle & release any expired active bot contracts to Holding Wallet
+  const expiredActiveContracts = await prisma.botContract.findMany({
+    where: {
+      userId,
+      status: "ACTIVE",
+      endDate: { lte: new Date() },
+    },
+  });
+
+  if (expiredActiveContracts.length > 0) {
+    for (const contract of expiredActiveContracts) {
+      try {
+        await releaseBotContractToHolding(userId, contract.id);
+      } catch (e) {
+        console.error("Auto bot release error:", e);
+      }
+    }
+  }
+
   const contracts = await prisma.botContract.findMany({
     where: { userId },
     include: {
