@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface LiveOrderbookProps {
   symbol: string;
@@ -18,24 +18,20 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
   const [asks, setAsks] = useState<OrderBookLevel[]>([]);
   const [isLiveWs, setIsLiveWs] = useState(false);
 
+  // Buffer ref to throttle rapid WebSocket updates to 60fps / 250ms renders
+  const latestDepthRef = useRef<{ rawBids: [string, string][]; rawAsks: [string, string][] } | null>(null);
+
+  // Price formatting helper for micro-coins (XRP/DOGE) vs majors (BTC/ETH/SOL)
+  const formatPrice = (p: number) => {
+    if (p < 10) return p.toFixed(4);
+    return p.toFixed(2);
+  };
+
   useEffect(() => {
     const streamSymbol = symbol.toLowerCase();
     let ws: WebSocket | null = null;
     let fallbackTimer: NodeJS.Timeout | null = null;
-
-    // Fetch initial orderbook depth from Binance REST API
-    const fetchBinanceDepth = async () => {
-      try {
-        const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol.toUpperCase()}&limit=6`);
-        if (res.ok) {
-          const data = await res.json();
-          parseAndSetDepth(data.bids, data.asks);
-        }
-      } catch (e) {
-        // Fallback simulation centered on livePrice if REST fails
-        generateFallbackDepth(livePrice || 94500);
-      }
-    };
+    let renderThrottleTimer: NodeJS.Timeout | null = null;
 
     const parseAndSetDepth = (rawBids: [string, string][], rawAsks: [string, string][]) => {
       let askTotal = 0;
@@ -66,36 +62,33 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
       setBids(parsedBids);
     };
 
-    const generateFallbackDepth = (basePrice: number) => {
-      let askTot = 0;
-      let bidTot = 0;
-      const fAsks = [];
-      const fBids = [];
-
-      for (let i = 5; i >= 1; i--) {
-        const p = parseFloat((basePrice + i * 2.5).toFixed(2));
-        const amt = parseFloat((Math.random() * 1.2 + 0.1).toFixed(3));
-        askTot += amt;
-        fAsks.push({ price: p, amount: amt, total: parseFloat(askTot.toFixed(3)) });
+    // Fetch initial depth snapshot
+    const fetchBinanceDepth = async () => {
+      try {
+        const res = await fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol.toUpperCase()}&limit=6`);
+        if (res.ok) {
+          const data = await res.json();
+          parseAndSetDepth(data.bids, data.asks);
+        }
+      } catch (e) {
+        // Silent fallback
       }
-
-      for (let i = 1; i <= 5; i++) {
-        const p = parseFloat((basePrice - i * 2.5).toFixed(2));
-        const amt = parseFloat((Math.random() * 1.2 + 0.1).toFixed(3));
-        bidTot += amt;
-        fBids.push({ price: p, amount: amt, total: parseFloat(bidTot.toFixed(3)) });
-      }
-
-      setAsks(fAsks);
-      setBids(fBids);
     };
 
-    // Initial fetch
     fetchBinanceDepth();
 
-    // Connect to real Binance Depth WebSocket Stream
+    // 250ms Throttled Render Loop - prevents React layout thrashing
+    renderThrottleTimer = setInterval(() => {
+      if (latestDepthRef.current) {
+        const { rawBids, rawAsks } = latestDepthRef.current;
+        latestDepthRef.current = null;
+        parseAndSetDepth(rawBids, rawAsks);
+      }
+    }, 250);
+
+    // Connect to Binance Depth WebSocket Stream (@depth10 for smooth 1s updates)
     try {
-      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streamSymbol}@depth10@100ms`);
+      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streamSymbol}@depth10@1000ms`);
 
       ws.onopen = () => setIsLiveWs(true);
 
@@ -103,27 +96,28 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
         try {
           const data = JSON.parse(event.data);
           if (data.bids && data.asks) {
-            parseAndSetDepth(data.bids, data.asks);
+            latestDepthRef.current = { rawBids: data.bids, rawAsks: data.asks };
           }
         } catch (err) {
-          console.error("Depth WS parse error", err);
+          // Ignore parse errors
         }
       };
 
       ws.onerror = () => {
         setIsLiveWs(false);
-        fallbackTimer = setInterval(fetchBinanceDepth, 2000);
+        fallbackTimer = setInterval(fetchBinanceDepth, 3000);
       };
     } catch (e) {
       setIsLiveWs(false);
-      fallbackTimer = setInterval(fetchBinanceDepth, 2000);
+      fallbackTimer = setInterval(fetchBinanceDepth, 3000);
     }
 
     return () => {
       if (ws) ws.close();
       if (fallbackTimer) clearInterval(fallbackTimer);
+      if (renderThrottleTimer) clearInterval(renderThrottleTimer);
     };
-  }, [symbol, livePrice]);
+  }, [symbol]);
 
   const maxTotal = Math.max(
     ...asks.map((a) => a.total),
@@ -132,7 +126,7 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
   );
 
   return (
-    <div className="bg-[#12161f] border border-[#263044] rounded-lg p-3 space-y-3 font-mono text-xs select-none">
+    <div className="bg-[#12161f] border border-[#263044] rounded-lg p-3 space-y-3 font-mono text-xs select-none shadow-xl">
       <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
         <span className="font-sans font-bold text-white uppercase text-[11px]">Binance Spot Order Book</span>
         <span className={`text-[10px] font-bold ${isLiveWs ? "text-[#0ecb81]" : "text-[#f0b90b]"}`}>
@@ -154,10 +148,10 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
           return (
             <div key={idx} className="relative grid grid-cols-3 py-0.5 items-center text-[11px]">
               <div
-                className="absolute right-0 top-0 bottom-0 bg-[#f6465d]/15 pointer-events-none rounded-sm transition-all"
+                className="absolute right-0 top-0 bottom-0 bg-[#f6465d]/15 pointer-events-none rounded-sm transition-all duration-150"
                 style={{ width: `${depthPercent}%` }}
               />
-              <span className="text-[#f6465d] font-bold z-10">${ask.price.toFixed(2)}</span>
+              <span className="text-[#f6465d] font-bold z-10">${formatPrice(ask.price)}</span>
               <span className="text-right text-slate-300 z-10">{ask.amount.toFixed(3)}</span>
               <span className="text-right text-[#848e9c] z-10">{ask.total.toFixed(3)}</span>
             </div>
@@ -167,7 +161,7 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
 
       {/* Mid Market Price Indicator */}
       <div className="py-1.5 my-1 bg-[#181e2a] border-y border-[#263044] text-center font-bold flex items-center justify-between px-2">
-        <span className="text-[#0ecb81] text-sm">${(livePrice || 0).toFixed(2)}</span>
+        <span className="text-[#0ecb81] text-sm">${formatPrice(livePrice || 0)}</span>
         <span className="text-[10px] text-[#848e9c] font-sans">Binance Matching Engine</span>
       </div>
 
@@ -178,10 +172,10 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
           return (
             <div key={idx} className="relative grid grid-cols-3 py-0.5 items-center text-[11px]">
               <div
-                className="absolute right-0 top-0 bottom-0 bg-[#0ecb81]/15 pointer-events-none rounded-sm transition-all"
+                className="absolute right-0 top-0 bottom-0 bg-[#0ecb81]/15 pointer-events-none rounded-sm transition-all duration-150"
                 style={{ width: `${depthPercent}%` }}
               />
-              <span className="text-[#0ecb81] font-bold z-10">${bid.price.toFixed(2)}</span>
+              <span className="text-[#0ecb81] font-bold z-10">${formatPrice(bid.price)}</span>
               <span className="text-right text-slate-300 z-10">{bid.amount.toFixed(3)}</span>
               <span className="text-right text-[#848e9c] z-10">{bid.total.toFixed(3)}</span>
             </div>
