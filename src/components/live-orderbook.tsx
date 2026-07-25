@@ -126,16 +126,16 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
   );
 
   return (
-    <div className="bg-[#12161f] border border-[#263044] rounded-lg p-3 space-y-3 font-mono text-xs select-none shadow-xl">
-      <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
-        <span className="font-sans font-bold text-white uppercase text-[11px]">Binance Spot Order Book</span>
-        <span className={`text-[10px] font-bold ${isLiveWs ? "text-[#0ecb81]" : "text-[#f0b90b]"}`}>
+    <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3 font-mono text-xs select-none shadow-xs">
+      <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+        <span className="font-sans font-bold text-slate-900 uppercase text-[11px]">Binance Spot Order Book</span>
+        <span className={`text-[10px] font-bold ${isLiveWs ? "text-emerald-600" : "text-amber-600"}`}>
           {isLiveWs ? "● REAL-TIME WS FEED" : "● SPOT DEPTH FEED"}
         </span>
       </div>
 
       {/* Table Headers */}
-      <div className="grid grid-cols-3 text-[10px] text-[#848e9c] uppercase font-sans">
+      <div className="grid grid-cols-3 text-[10px] text-slate-400 uppercase font-sans font-bold">
         <span>Price (USDT)</span>
         <span className="text-right">Size ({symbol.replace("USDT", "")})</span>
         <span className="text-right">Total</span>
@@ -148,21 +148,21 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
           return (
             <div key={idx} className="relative grid grid-cols-3 py-0.5 items-center text-[11px]">
               <div
-                className="absolute right-0 top-0 bottom-0 bg-[#f6465d]/15 pointer-events-none rounded-sm transition-all duration-150"
+                className="absolute right-0 top-0 bottom-0 bg-rose-100/60 pointer-events-none rounded-sm transition-all duration-150"
                 style={{ width: `${depthPercent}%` }}
               />
-              <span className="text-[#f6465d] font-bold z-10">${formatPrice(ask.price)}</span>
-              <span className="text-right text-slate-300 z-10">{ask.amount.toFixed(3)}</span>
-              <span className="text-right text-[#848e9c] z-10">{ask.total.toFixed(3)}</span>
+              <span className="text-rose-600 font-bold z-10">${formatPrice(ask.price)}</span>
+              <span className="text-right text-slate-700 z-10">{ask.amount.toFixed(3)}</span>
+              <span className="text-right text-slate-400 z-10">{ask.total.toFixed(3)}</span>
             </div>
           );
         })}
       </div>
 
       {/* Mid Market Price Indicator */}
-      <div className="py-1.5 my-1 bg-[#181e2a] border-y border-[#263044] text-center font-bold flex items-center justify-between px-2">
-        <span className="text-[#0ecb81] text-sm">${formatPrice(livePrice || 0)}</span>
-        <span className="text-[10px] text-[#848e9c] font-sans">Binance Matching Engine</span>
+      <div className="py-1.5 my-1 bg-slate-50 border-y border-slate-200 text-center font-bold flex items-center justify-between px-2">
+        <span className="text-emerald-600 text-sm font-black">${formatPrice(livePrice || 0)}</span>
+        <span className="text-[10px] text-slate-500 font-sans">Binance Matching Engine</span>
       </div>
 
       {/* Bids (Buy Orders - Green) */}
@@ -172,12 +172,12 @@ export default function LiveOrderbook({ symbol, livePrice }: LiveOrderbookProps)
           return (
             <div key={idx} className="relative grid grid-cols-3 py-0.5 items-center text-[11px]">
               <div
-                className="absolute right-0 top-0 bottom-0 bg-[#0ecb81]/15 pointer-events-none rounded-sm transition-all duration-150"
+                className="absolute right-0 top-0 bottom-0 bg-emerald-100/60 pointer-events-none rounded-sm transition-all duration-150"
                 style={{ width: `${depthPercent}%` }}
               />
-              <span className="text-[#0ecb81] font-bold z-10">${formatPrice(bid.price)}</span>
-              <span className="text-right text-slate-300 z-10">{bid.amount.toFixed(3)}</span>
-              <span className="text-right text-[#848e9c] z-10">{bid.total.toFixed(3)}</span>
+              <span className="text-emerald-600 font-bold z-10">${formatPrice(bid.price)}</span>
+              <span className="text-right text-slate-700 z-10">{bid.amount.toFixed(3)}</span>
+              <span className="text-right text-slate-400 z-10">{bid.total.toFixed(3)}</span>
             </div>
           );
         })}

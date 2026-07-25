@@ -51,26 +51,26 @@ export default function LiveTradesStream({ symbol, livePrice }: LiveTradesStream
   }, [livePrice]);
 
   return (
-    <div className="bg-[#12161f] border border-[#263044] rounded-lg p-3 space-y-3 font-mono text-xs select-none">
-      <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
-        <span className="font-sans font-bold text-white uppercase text-[11px]">Recent Executed Trades</span>
-        <span className="text-[10px] text-[#0ecb81] font-bold">● LIVE STREAM</span>
+    <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3 font-mono text-xs select-none shadow-xs">
+      <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+        <span className="font-sans font-bold text-slate-900 uppercase text-[11px]">Recent Market Trades</span>
+        <span className="text-[10px] text-emerald-600 font-bold">● LIVE STREAM</span>
       </div>
 
-      <div className="grid grid-cols-3 text-[10px] text-[#848e9c] uppercase font-sans">
+      <div className="grid grid-cols-3 text-[10px] text-slate-400 uppercase font-sans font-bold">
         <span>Price (USDT)</span>
         <span className="text-right">Size ({symbol.replace("USDT", "")})</span>
         <span className="text-right">Time</span>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1 divide-y divide-slate-100">
         {trades.map((t) => (
-          <div key={t.id} className="grid grid-cols-3 py-0.5 items-center text-[11px] hover:bg-[#181e2a] rounded px-1 transition-colors">
-            <span className={`font-bold ${t.side === "BUY" ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
-              ${t.price.toFixed(2)}
+          <div key={t.id} className="grid grid-cols-3 py-1.5 items-center text-[11px] font-mono">
+            <span className={`font-bold ${t.side === "BUY" ? "text-emerald-600" : "text-rose-600"}`}>
+              ${t.price < 10 ? t.price.toFixed(4) : t.price.toFixed(2)}
             </span>
-            <span className="text-right text-slate-300">{t.amount.toFixed(3)}</span>
-            <span className="text-right text-[#848e9c] text-[10px]">{t.time}</span>
+            <span className="text-right text-slate-700 font-semibold">{t.amount.toFixed(3)}</span>
+            <span className="text-right text-slate-400">{t.time}</span>
           </div>
         ))}
       </div>

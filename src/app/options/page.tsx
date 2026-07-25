@@ -232,15 +232,15 @@ export default function OptionsPage() {
     const strike = Number(trade.strikePrice);
     const currentPrice = trade.symbol === selectedAsset ? livePrice : (allMarketPrices[trade.symbol] || strike);
 
-    if (currentPrice === strike) return { label: "STRIKE MATCH", color: "text-[#38bdf8] bg-[#38bdf8]/10 border-[#38bdf8]/30" };
+    if (currentPrice === strike) return { label: "STRIKE MATCH", color: "text-sky-600 bg-sky-50 border-sky-200" };
     if (trade.direction === "CALL") {
       return currentPrice > strike
-        ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
-        : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
+        ? { label: "IN THE MONEY ▲", color: "text-emerald-700 bg-emerald-50 border-emerald-200" }
+        : { label: "OUT OF THE MONEY ▼", color: "text-rose-700 bg-rose-50 border-rose-200" };
     } else {
       return currentPrice < strike
-        ? { label: "IN THE MONEY ▲", color: "text-[#0ecb81] bg-[#0ecb81]/10 border-[#0ecb81]/30" }
-        : { label: "OUT OF THE MONEY ▼", color: "text-[#f6465d] bg-[#f6465d]/10 border-[#f6465d]/30" };
+        ? { label: "IN THE MONEY ▲", color: "text-emerald-700 bg-emerald-50 border-emerald-200" }
+        : { label: "OUT OF THE MONEY ▼", color: "text-rose-700 bg-rose-50 border-rose-200" };
     }
   };
 
@@ -250,12 +250,12 @@ export default function OptionsPage() {
   const isUp = price24hChange >= 0;
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-[1650px] w-full mx-auto px-3 sm:px-6 py-4 space-y-3">
         {/* Ticker Header Bar */}
-        <div className="bg-[#12161f] border border-[#263044] rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+        <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs shadow-xs">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
             {/* Asset Selector */}
             <div className="flex items-center gap-1.5 shrink-0">
@@ -263,10 +263,10 @@ export default function OptionsPage() {
                 <button
                   key={asset.symbol}
                   onClick={() => setSelectedAsset(asset.symbol)}
-                  className={`px-2.5 py-1.5 rounded font-sans text-xs font-bold transition-all shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg font-sans text-xs font-bold transition-all shrink-0 ${
                     selectedAsset === asset.symbol
-                      ? "bg-[#263044] text-[#f0b90b] shadow"
-                      : "text-[#848e9c] hover:text-white hover:bg-[#181e2a]"
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   {asset.pair}
@@ -275,30 +275,30 @@ export default function OptionsPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-[#263044] pt-2 sm:pt-0 font-mono">
+          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-slate-200 pt-2 sm:pt-0 font-mono">
             <div className="flex items-center gap-4">
               <div>
-                <span className="text-[#848e9c] font-sans text-[9px] sm:text-[10px] block uppercase">Spot Price</span>
-                <span className="text-white font-bold text-xs sm:text-sm">${livePrice.toFixed(2)}</span>
+                <span className="text-slate-400 font-sans text-[9px] sm:text-[10px] block uppercase font-bold">Spot Price</span>
+                <span className="text-slate-900 font-bold text-xs sm:text-sm">${livePrice < 10 ? livePrice.toFixed(4) : livePrice.toFixed(2)}</span>
               </div>
               <div>
-                <span className="text-[#848e9c] font-sans text-[9px] sm:text-[10px] block uppercase">24h Change</span>
-                <span className={`font-bold text-xs sm:text-sm ${isUp ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
+                <span className="text-slate-400 font-sans text-[9px] sm:text-[10px] block uppercase font-bold">24h Change</span>
+                <span className={`font-bold text-xs sm:text-sm ${isUp ? "text-emerald-600" : "text-rose-600"}`}>
                   {isUp ? "+" : ""}{price24hChange}%
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="bg-[#0b0e11] px-2.5 py-1 rounded border border-[#263044] text-[11px]">
-                <span className="text-[#848e9c] font-sans">Wallet: </span>
-                <span className="text-[#0ecb81] font-bold">${personalBalance.toFixed(2)}</span>
+              <div className="bg-slate-50 px-3 py-1 rounded-lg border border-slate-200 text-[11px]">
+                <span className="text-slate-500 font-sans font-bold">Wallet: </span>
+                <span className="text-emerald-600 font-bold">${personalBalance.toFixed(2)}</span>
               </div>
               <button
                 onClick={() => setIsTransferModalOpen(true)}
-                className="px-2.5 py-1 bg-[#263044] hover:bg-[#323e57] text-white rounded font-sans text-xs font-bold transition-colors flex items-center gap-1"
+                className="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg font-sans text-xs font-bold transition-colors flex items-center gap-1"
               >
-                <ArrowRightLeft className="w-3 h-3 text-[#f0b90b]" />
+                <ArrowRightLeft className="w-3.5 h-3.5 text-blue-600" />
                 <span className="hidden sm:inline">Transfer</span>
               </button>
             </div>
@@ -307,26 +307,26 @@ export default function OptionsPage() {
 
         {/* Live Active Trade Countdown Banner */}
         {latestPendingTrade && (
-          <div className="bg-[#12161f] border border-[#f0b90b]/40 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-xs">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 font-bold">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold">
                 <Timer className="w-4 h-4 animate-spin" />
                 <span>POSITION ACTIVE</span>
               </div>
 
-              <span className="font-bold text-white">
+              <span className="font-bold text-slate-900">
                 {latestPendingTrade.symbol} {latestPendingTrade.direction} @ ${Number(latestPendingTrade.strikePrice).toFixed(2)}
               </span>
 
-              <span className={`px-2.5 py-0.5 rounded border font-bold text-[10px] ${getTradeLiveStatus(latestPendingTrade).color}`}>
+              <span className={`px-2.5 py-0.5 rounded-md font-bold text-[10px] border ${getTradeLiveStatus(latestPendingTrade).color}`}>
                 {getTradeLiveStatus(latestPendingTrade).label}
               </span>
             </div>
 
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className="text-[#848e9c] font-sans">Countdown:</span>
-                <span className="text-[#f0b90b] font-bold text-sm bg-[#0b0e11] px-3 py-1 rounded border border-[#263044]">
+                <span className="text-slate-600 font-sans font-bold">Countdown:</span>
+                <span className="text-amber-800 font-bold text-sm bg-white px-3 py-1 rounded-lg border border-amber-200 shadow-xs">
                   ⏱️ {formatTimer(latestPendingTrade.expiresAt)}
                 </span>
               </div>
@@ -348,35 +348,35 @@ export default function OptionsPage() {
             />
 
             {/* Bottom Tabs: Positions, History, Order Book */}
-            <div className="bg-[#12161f] border border-[#263044] rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between border-b border-[#263044] pb-2">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveTab("POSITIONS")}
-                    className={`px-3 py-1.5 rounded font-sans text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg font-sans text-xs font-bold transition-all ${
                       activeTab === "POSITIONS"
-                        ? "bg-[#263044] text-[#f0b90b]"
-                        : "text-[#848e9c] hover:text-white"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
                     Open Positions ({activePendingTrades.length})
                   </button>
                   <button
                     onClick={() => setActiveTab("HISTORY")}
-                    className={`px-3 py-1.5 rounded font-sans text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg font-sans text-xs font-bold transition-all ${
                       activeTab === "HISTORY"
-                        ? "bg-[#263044] text-[#f0b90b]"
-                        : "text-[#848e9c] hover:text-white"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
                     Order History ({trades.length})
                   </button>
                   <button
                     onClick={() => setActiveTab("ORDERBOOK")}
-                    className={`px-3 py-1.5 rounded font-sans text-xs font-bold transition-all md:hidden ${
+                    className={`px-3 py-1.5 rounded-lg font-sans text-xs font-bold transition-all md:hidden ${
                       activeTab === "ORDERBOOK"
-                        ? "bg-[#263044] text-[#f0b90b]"
-                        : "text-[#848e9c] hover:text-white"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
                     Order Book
@@ -389,7 +389,7 @@ export default function OptionsPage() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="bg-[#0b0e11] text-[#848e9c] uppercase text-[10px] border-b border-[#263044]">
+                    <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] border-b border-slate-200 font-bold">
                       <tr>
                         <th className="p-2.5">Symbol</th>
                         <th className="p-2.5">Side</th>
@@ -400,7 +400,7 @@ export default function OptionsPage() {
                         <th className="p-2.5">Payout</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#263044]/50 text-slate-200">
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
                       {(activeTab === "POSITIONS" ? activePendingTrades : trades).map((trade) => {
                         const isPending = trade.status === "PENDING";
                         const isWin = trade.status === "WIN";
@@ -408,37 +408,37 @@ export default function OptionsPage() {
                         const liveStatus = getTradeLiveStatus(trade);
 
                         return (
-                          <tr key={trade.id} className="hover:bg-[#181e2a] transition-colors">
-                            <td className="p-2.5 font-bold text-white">{trade.symbol}</td>
+                          <tr key={trade.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="p-2.5 font-bold text-slate-900">{trade.symbol}</td>
                             <td className="p-2.5">
                               <span
-                                className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                                className={`font-bold px-2 py-0.5 rounded-md text-[10px] ${
                                   trade.direction === "CALL"
-                                    ? "bg-[#0ecb81]/10 text-[#0ecb81]"
-                                    : "bg-[#f6465d]/10 text-[#f6465d]"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : "bg-rose-100 text-rose-700"
                                 }`}
                               >
                                 {trade.direction}
                               </span>
                             </td>
-                            <td className="p-2.5">${Number(trade.stakeAmount).toFixed(2)}</td>
-                            <td className="p-2.5">${Number(trade.strikePrice).toFixed(2)}</td>
-                            <td className="p-2.5">
+                            <td className="p-2.5 font-semibold">${Number(trade.stakeAmount).toFixed(2)}</td>
+                            <td className="p-2.5 font-semibold">${Number(trade.strikePrice).toFixed(2)}</td>
+                            <td className="p-2.5 font-semibold">
                               {trade.settlementPrice ? `$${Number(trade.settlementPrice).toFixed(2)}` : `$${livePrice.toFixed(2)}`}
                             </td>
                             <td className="p-2.5">
                               {isPending ? (
                                 <div className="flex items-center gap-2">
-                                  <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] border ${liveStatus.color}`}>
+                                  <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${liveStatus.color}`}>
                                     {liveStatus.label}
                                   </span>
-                                  <span className="text-[#f0b90b] font-bold">
+                                  <span className="text-amber-600 font-bold">
                                     ⏱️ {formatTimer(trade.expiresAt)}
                                   </span>
                                 </div>
                               ) : (
-                                <span className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
-                                  isWin ? "bg-[#0ecb81]/10 text-[#0ecb81]" : "bg-[#f6465d]/10 text-[#f6465d]"
+                                <span className={`font-bold px-2 py-0.5 rounded-md text-[10px] ${
+                                  isWin ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
                                 }`}>
                                   {trade.status}
                                 </span>
@@ -446,11 +446,11 @@ export default function OptionsPage() {
                             </td>
                             <td className="p-2.5 font-bold">
                               {isWin ? (
-                                <span className="text-[#0ecb81]">+${(Number(trade.stakeAmount) * Number(trade.payoutMultiplier)).toFixed(2)}</span>
+                                <span className="text-emerald-600">+${(Number(trade.stakeAmount) * Number(trade.payoutMultiplier)).toFixed(2)}</span>
                               ) : isLoss ? (
-                                <span className="text-[#f6465d]">$0.00</span>
+                                <span className="text-rose-600">$0.00</span>
                               ) : (
-                                <span className="text-[#848e9c]">Pending</span>
+                                <span className="text-slate-400">Pending</span>
                               )}
                             </td>
                           </tr>
@@ -458,8 +458,9 @@ export default function OptionsPage() {
                       })}
                     </tbody>
                   </table>
+
                   {(activeTab === "POSITIONS" ? activePendingTrades : trades).length === 0 && (
-                    <div className="text-center py-6 text-[#848e9c] text-xs font-mono">
+                    <div className="text-center py-8 text-slate-400 text-xs font-mono">
                       No positions found. Select duration and stake to open an option order.
                     </div>
                   )}
@@ -470,27 +471,27 @@ export default function OptionsPage() {
 
           {/* Right Column: Binary Options Order Entry Ticket + Live Orderbook (4 cols) */}
           <div className="lg:col-span-4 space-y-3">
-            <div className="bg-[#12161f] border border-[#263044] rounded-lg p-5 space-y-5">
-              <div className="flex justify-between items-center pb-2 border-b border-[#263044]">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Order Ticket Desk</h3>
-                <span className="text-xs font-mono font-bold text-[#0ecb81]">
+            <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-5 shadow-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">Order Ticket Desk</h3>
+                <span className="text-xs font-mono font-bold text-emerald-600">
                   +{winPayoutRate}% PAYOUT
                 </span>
               </div>
 
               {/* Timeframe Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs text-[#848e9c] block font-sans">Expiry Duration</label>
+                <label className="text-xs text-slate-500 block font-sans font-bold">Expiry Duration</label>
                 <div className="grid grid-cols-3 gap-2 font-mono">
                   {timeframes.map((tf) => (
                     <button
                       key={tf}
                       type="button"
                       onClick={() => setTimeframe(tf)}
-                      className={`py-1.5 rounded text-xs font-bold transition-all ${
+                      className={`py-2 rounded-lg text-xs font-bold transition-all ${
                         timeframe === tf
-                          ? "bg-[#f0b90b] text-[#0b0e11] shadow"
-                          : "bg-[#0b0e11] text-[#848e9c] hover:text-white border border-[#263044]"
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200"
                       }`}
                     >
                       {tf.toUpperCase()}
@@ -502,8 +503,8 @@ export default function OptionsPage() {
               {/* Stake Input */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="text-[#848e9c] font-sans">Stake Amount (USDT)</label>
-                  <span className="text-[#848e9c] font-mono">Bal: ${personalBalance.toFixed(2)}</span>
+                  <label className="text-slate-500 font-sans font-bold">Stake Amount (USDT)</label>
+                  <span className="text-slate-400 font-mono">Bal: ${personalBalance.toFixed(2)}</span>
                 </div>
 
                 {/* Quick Percentage Buttons */}
@@ -513,7 +514,7 @@ export default function OptionsPage() {
                       key={pct}
                       type="button"
                       onClick={() => setStakePercentage(pct)}
-                      className="py-1 rounded border border-[#263044] bg-[#0b0e11] text-[#848e9c] hover:text-white hover:border-[#f0b90b] transition-colors"
+                      className="py-1 rounded-md border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-blue-600 transition-colors font-bold"
                     >
                       {pct}%
                     </button>
@@ -525,46 +526,46 @@ export default function OptionsPage() {
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="100.00"
-                  className="w-full bg-[#0b0e11] border border-[#263044] rounded px-3 py-2 text-sm font-mono font-bold text-white outline-none focus:border-[#f0b90b]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition-colors"
                 />
               </div>
 
               {/* Summary */}
-              <div className="p-3 bg-[#0b0e11] rounded border border-[#263044] space-y-1.5 text-xs font-mono">
-                <div className="flex justify-between text-[#848e9c]">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs font-mono">
+                <div className="flex justify-between text-slate-500">
                   <span>Stake Amount:</span>
-                  <span className="text-white font-bold">${parseFloat(stakeAmount) || 0}</span>
+                  <span className="text-slate-900 font-bold">${parseFloat(stakeAmount) || 0}</span>
                 </div>
-                <div className="flex justify-between text-[#848e9c]">
+                <div className="flex justify-between text-slate-500">
                   <span>Est. Profit ({winPayoutRate}%):</span>
-                  <span className="text-[#0ecb81] font-bold">+${((parseFloat(stakeAmount) || 0) * (winPayoutRate / 100)).toFixed(2)}</span>
+                  <span className="text-emerald-600 font-bold">+${((parseFloat(stakeAmount) || 0) * (winPayoutRate / 100)).toFixed(2)}</span>
                 </div>
-                <div className="pt-1.5 border-t border-[#263044] flex justify-between text-xs font-bold">
-                  <span className="text-slate-300">Total Payout:</span>
-                  <span className="text-[#0ecb81]">${calculatedPayout.toFixed(2)}</span>
+                <div className="pt-2 border-t border-slate-200 flex justify-between text-xs font-bold">
+                  <span className="text-slate-700">Total Payout:</span>
+                  <span className="text-emerald-600 font-black">${calculatedPayout.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Notifications */}
               {error && (
-                <div className="p-2.5 bg-[#f6465d]/10 border border-[#f6465d]/30 rounded text-xs text-[#f6465d] flex items-center gap-2">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-center gap-2 font-medium">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
               {successMsg && (
-                <div className="p-2.5 bg-[#0ecb81]/10 border border-[#0ecb81]/30 rounded text-xs text-[#0ecb81] flex items-center gap-2">
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700 flex items-center gap-2 font-medium">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{successMsg}</span>
                 </div>
               )}
 
               {/* Action Trade Buttons */}
-              <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-2 gap-3 pt-1 font-sans">
                 <button
                   onClick={() => handleExecuteTrade("CALL")}
                   disabled={loading}
-                  className="py-3 bg-[#0ecb81] hover:bg-[#0bb572] text-[#0b0e11] font-bold rounded text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 shadow"
+                  className="py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs"
                 >
                   <TrendingUp className="w-4 h-4" />
                   <span>CALL</span>
@@ -573,7 +574,7 @@ export default function OptionsPage() {
                 <button
                   onClick={() => handleExecuteTrade("PUT")}
                   disabled={loading}
-                  className="py-3 bg-[#f6465d] hover:bg-[#e0354c] text-white font-bold rounded text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 shadow"
+                  className="py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs"
                 >
                   <TrendingDown className="w-4 h-4" />
                   <span>PUT</span>
@@ -583,19 +584,19 @@ export default function OptionsPage() {
 
             {/* Desktop Live Order Book & Executed Trades Drawer */}
             <div className="hidden lg:block space-y-2">
-              <div className="flex items-center gap-1 bg-[#12161f] border border-[#263044] p-1 rounded-lg text-xs font-mono">
+              <div className="flex items-center gap-1 bg-white border border-slate-200 p-1 rounded-xl text-xs font-mono shadow-xs">
                 <button
                   onClick={() => setRightDrawerTab("ORDERBOOK")}
-                  className={`flex-1 py-1.5 rounded font-sans text-[11px] font-bold text-center transition-all ${
-                    rightDrawerTab === "ORDERBOOK" ? "bg-[#263044] text-[#f0b90b]" : "text-[#848e9c] hover:text-white"
+                  className={`flex-1 py-1.5 rounded-lg font-sans text-[11px] font-bold text-center transition-all ${
+                    rightDrawerTab === "ORDERBOOK" ? "bg-slate-100 text-blue-600 font-bold" : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
                   Order Book
                 </button>
                 <button
                   onClick={() => setRightDrawerTab("TRADES")}
-                  className={`flex-1 py-1.5 rounded font-sans text-[11px] font-bold text-center transition-all ${
-                    rightDrawerTab === "TRADES" ? "bg-[#263044] text-[#f0b90b]" : "text-[#848e9c] hover:text-white"
+                  className={`flex-1 py-1.5 rounded-lg font-sans text-[11px] font-bold text-center transition-all ${
+                    rightDrawerTab === "TRADES" ? "bg-slate-100 text-blue-600 font-bold" : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
                   Recent Trades

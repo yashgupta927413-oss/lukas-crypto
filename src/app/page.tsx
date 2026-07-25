@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
+  Zap,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -52,83 +53,88 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] text-[#eaecef] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans">
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="pt-6 sm:pt-10 pb-10 sm:pb-14 px-4 sm:px-6 lg:px-8 border-b border-[#2b313a]">
-        <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+      <section className="pt-8 sm:pt-12 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Hero Content */}
-          <div className="lg:col-span-5 space-y-5 sm:space-y-6">
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+          <div className="lg:col-span-5 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold font-mono">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Institutional Options Desk &amp; Earn Vaults</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 leading-tight">
               Trade Crypto Options &amp; Earn Yields
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#848e9c] leading-relaxed">
+            <p className="text-sm text-slate-600 leading-relaxed font-sans">
               Execute 1-minute to 15-minute binary option contracts with 75% fixed payouts, or lock digital assets in structured quantitative yield vaults.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
               <Link
                 href="/options"
-                className="px-6 py-3.5 rounded text-xs font-bold bg-[#f0b90b] text-[#0b0e11] hover:bg-[#d97706] transition-colors shadow flex items-center justify-center gap-2"
+                className="px-6 py-3.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
               >
                 <span>Trade Options</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/bots"
-                className="px-6 py-3.5 rounded text-xs font-semibold bg-[#181a20] text-white hover:bg-[#1e2329] border border-[#2b313a] transition-colors text-center"
+                className="px-6 py-3.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-200 transition-colors text-center shadow-xs"
               >
                 <span>Earn Vaults</span>
               </Link>
             </div>
 
             {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-5 border-t border-[#2b313a] text-xs font-mono">
-              <div>
-                <span className="text-[#848e9c] uppercase block font-sans text-[9px] sm:text-[10px]">Fixed Payout</span>
-                <span className="text-white font-bold text-xs sm:text-sm">75% Return</span>
+            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-slate-200 text-xs font-mono">
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                <span className="text-slate-500 uppercase block font-sans text-[10px] font-semibold">Fixed Payout</span>
+                <span className="text-slate-900 font-bold text-sm">75% Return</span>
               </div>
-              <div>
-                <span className="text-[#848e9c] uppercase block font-sans text-[9px] sm:text-[10px]">Expirations</span>
-                <span className="text-[#0ecb81] font-bold text-xs sm:text-sm">1m / 5m / 15m</span>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                <span className="text-slate-500 uppercase block font-sans text-[10px] font-semibold">Expirations</span>
+                <span className="text-emerald-600 font-bold text-sm">1m / 5m / 15m</span>
               </div>
-              <div>
-                <span className="text-[#848e9c] uppercase block font-sans text-[9px] sm:text-[10px]">Data Source</span>
-                <span className="text-[#f0b90b] font-bold text-xs sm:text-sm">Binance API</span>
+              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                <span className="text-slate-500 uppercase block font-sans text-[10px] font-semibold">Data Feed</span>
+                <span className="text-blue-600 font-bold text-sm">Binance API</span>
               </div>
             </div>
           </div>
 
           {/* Right Hero: Binance TradingView Chart */}
           <div className="lg:col-span-7 space-y-2">
-            <div className="flex justify-between items-center px-1 text-xs font-mono text-[#848e9c]">
-              <span className="font-semibold text-white text-[11px] sm:text-xs">BTC/USDT Spot Index</span>
-              <span className="text-white font-bold text-xs sm:text-sm">${liveBtcPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <div className="flex justify-between items-center px-1 text-xs font-mono text-slate-500">
+              <span className="font-bold text-slate-800">BTC/USDT Spot Index</span>
+              <span className="text-slate-900 font-bold text-sm">${liveBtcPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
 
-            <TradingViewChart symbol="BTCUSDT" />
+            <TradingViewChart symbol="BTCUSDT" theme="light" />
           </div>
         </div>
       </section>
 
       {/* MARKETS SECTION */}
-      <section className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-b border-[#2b313a] bg-[#07090b]">
-        <div className="max-w-[1600px] mx-auto space-y-4">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 bg-[#f8fafc]">
+        <div className="max-w-[1600px] mx-auto space-y-5">
           <div className="flex justify-between items-end">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">Markets</h2>
-              <p className="text-xs text-[#848e9c]">Live spot prices and binary option contracts</p>
+              <h2 className="text-lg font-bold text-slate-900 uppercase tracking-wider font-mono">Markets</h2>
+              <p className="text-xs text-slate-500">Live spot prices and binary option contracts</p>
             </div>
-            <Link href="/options" className="text-xs text-[#f0b90b] hover:underline font-semibold flex items-center gap-1">
+            <Link href="/options" className="text-xs text-blue-600 hover:underline font-bold flex items-center gap-1">
               <span>All Markets</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           {/* Mobile Card List (< md screens) */}
-          <div className="md:hidden space-y-2.5">
+          <div className="md:hidden space-y-3">
             {marketList.map((m) => {
               const data = prices[m.symbol] || { price: 0, change24h: 0 };
               const isUp = data.change24h >= 0;
@@ -136,18 +142,18 @@ export default function HomePage() {
               return (
                 <div
                   key={m.symbol}
-                  className="bg-[#181a20] border border-[#2b313a] rounded-lg p-3.5 flex items-center justify-between gap-3 font-mono text-xs"
+                  className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3 font-mono text-xs shadow-xs"
                 >
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm font-sans">{m.name}</span>
-                      <span className="text-[#848e9c] text-[10px]">{m.pair}</span>
+                      <span className="font-bold text-slate-900 text-sm font-sans">{m.name}</span>
+                      <span className="text-slate-400 text-[10px]">{m.pair}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-bold text-xs">
+                      <span className="text-slate-900 font-bold text-xs">
                         ${data.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </span>
-                      <span className={`font-bold text-[11px] ${isUp ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
+                      <span className={`font-bold text-[11px] ${isUp ? "text-emerald-600" : "text-rose-600"}`}>
                         {isUp ? "+" : ""}{data.change24h}%
                       </span>
                     </div>
@@ -155,7 +161,7 @@ export default function HomePage() {
 
                   <Link
                     href={`/options?symbol=${m.symbol}`}
-                    className="px-3 py-2 bg-[#2b313a] active:bg-[#474d57] text-[#f0b90b] font-bold rounded text-xs font-sans transition-colors shrink-0"
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs font-sans transition-colors shrink-0 shadow-xs"
                   >
                     Trade →
                   </Link>
@@ -165,45 +171,45 @@ export default function HomePage() {
           </div>
 
           {/* Desktop Table (>= md screens) */}
-          <div className="hidden md:block bg-[#181a20] border border-[#2b313a] rounded-lg overflow-hidden">
+          <div className="hidden md:block bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#0b0e11] text-[#848e9c] uppercase text-[10px] border-b border-[#2b313a]">
+              <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] border-b border-slate-200">
                 <tr>
-                  <th className="py-3 px-6 font-sans">Trading Pair</th>
-                  <th className="py-3 px-6">Last Price</th>
-                  <th className="py-3 px-6">24h Change</th>
-                  <th className="py-3 px-6">Contract Expirations</th>
-                  <th className="py-3 px-6 text-right font-sans">Trade</th>
+                  <th className="py-3.5 px-6 font-sans font-bold">Trading Pair</th>
+                  <th className="py-3.5 px-6 font-bold">Last Price</th>
+                  <th className="py-3.5 px-6 font-bold">24h Change</th>
+                  <th className="py-3.5 px-6 font-bold">Contract Expirations</th>
+                  <th className="py-3.5 px-6 text-right font-sans font-bold">Trade</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2b313a]/50">
+              <tbody className="divide-y divide-slate-100">
                 {marketList.map((m) => {
                   const data = prices[m.symbol] || { price: 0, change24h: 0 };
                   const isUp = data.change24h >= 0;
 
                   return (
-                    <tr key={m.symbol} className="hover:bg-[#1e2329] transition-colors">
-                      <td className="py-3.5 px-6 font-sans">
+                    <tr key={m.symbol} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-4 px-6 font-sans">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-sm">{m.name}</span>
-                          <span className="text-[#848e9c] font-mono text-xs">{m.pair}</span>
+                          <span className="font-bold text-slate-900 text-sm">{m.name}</span>
+                          <span className="text-slate-400 font-mono text-xs">{m.pair}</span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-6 text-white font-bold text-sm">
+                      <td className="py-4 px-6 text-slate-900 font-bold text-sm">
                         ${data.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="py-3.5 px-6">
-                        <span className={`font-bold ${isUp ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
+                      <td className="py-4 px-6">
+                        <span className={`font-bold ${isUp ? "text-emerald-600" : "text-rose-600"}`}>
                           {isUp ? "+" : ""}{data.change24h}%
                         </span>
                       </td>
-                      <td className="py-3.5 px-6 text-[#848e9c]">
+                      <td className="py-4 px-6 text-slate-500">
                         1m • 5m • 15m
                       </td>
-                      <td className="py-3.5 px-6 text-right">
+                      <td className="py-4 px-6 text-right">
                         <Link
                           href={`/options?symbol=${m.symbol}`}
-                          className="px-3 py-1 bg-[#2b313a] hover:bg-[#474d57] text-[#f0b90b] font-bold rounded text-xs transition-colors inline-block"
+                          className="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-lg text-xs transition-colors inline-block border border-blue-200"
                         >
                           Trade Options →
                         </Link>
@@ -218,31 +224,31 @@ export default function HomePage() {
       </section>
 
       {/* CORE PRODUCTS */}
-      <section className="py-12 sm:py-14 px-4 sm:px-6 lg:px-8 border-b border-[#2b313a]">
-        <div className="max-w-[1600px] mx-auto space-y-8 sm:space-y-10">
-          <div className="text-center max-w-xl mx-auto space-y-1.5">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Trading &amp; Investment Solutions</h2>
-            <p className="text-xs text-[#848e9c]">
+      <section className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 bg-white">
+        <div className="max-w-[1600px] mx-auto space-y-10">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <h2 className="text-2xl font-bold text-slate-900">Trading &amp; Investment Solutions</h2>
+            <p className="text-xs text-slate-500">
               Built for speed, transparency, and reliable execution.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-            <div className="bg-[#181a20] border border-[#2b313a] rounded-lg p-5 sm:p-6 space-y-5 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="text-xs font-mono font-bold text-[#f0b90b] uppercase">Derivatives</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">Digital Binary Options</h3>
-                <p className="text-xs text-[#848e9c] leading-relaxed">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6 flex flex-col justify-between shadow-xs">
+              <div className="space-y-4">
+                <div className="text-xs font-mono font-bold text-blue-600 uppercase">Derivatives</div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Digital Binary Options</h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Predict price direction over short-term windows. Winning contracts automatically credit 75% profit returns directly to your trading account.
                 </p>
 
-                <ul className="space-y-2 text-xs text-slate-300 font-mono">
+                <ul className="space-y-2.5 text-xs text-slate-700 font-mono">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0ecb81] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Real-time Binance spot tick settlement</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0ecb81] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Fixed 75% payout multiplier (1.75x)</span>
                   </li>
                 </ul>
@@ -250,35 +256,35 @@ export default function HomePage() {
 
               <Link
                 href="/options"
-                className="w-full py-3 bg-[#2b313a] hover:bg-[#474d57] text-white font-bold rounded text-xs text-center transition-colors block"
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs text-center transition-colors shadow-sm block"
               >
                 Launch Options Desk →
               </Link>
             </div>
 
-            <div className="bg-[#181a20] border border-[#2b313a] rounded-lg p-5 sm:p-6 space-y-5 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="text-xs font-mono font-bold text-[#38bdf8] uppercase">Structured Earn</div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">Quantitative Yield Vaults</h3>
-                <p className="text-xs text-[#848e9c] leading-relaxed">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6 flex flex-col justify-between shadow-xs">
+              <div className="space-y-4">
+                <div className="text-xs font-mono font-bold text-amber-600 uppercase">Structured Earn</div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Quantitative Yield Vaults</h3>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Lock assets for 30 to 365 days in quantitative yield strategies. Daily yield compounds automatically into your vault balance.
                 </p>
 
-                <ul className="space-y-2 text-xs text-slate-300 font-mono">
+                <ul className="space-y-2.5 text-xs text-slate-700 font-mono">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0ecb81] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Flexible term lengths (30, 90, 180, 365 Days)</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0ecb81] shrink-0" />
-                    <span>Automatic maturity unlock and release</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Automatic maturity unlock and release to Holding Wallet</span>
                   </li>
                 </ul>
               </div>
 
               <Link
                 href="/bots"
-                className="w-full py-3 bg-[#2b313a] hover:bg-[#474d57] text-white font-bold rounded text-xs text-center transition-colors block"
+                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs text-center transition-colors shadow-sm block"
               >
                 Explore Yield Vaults →
               </Link>
@@ -288,11 +294,11 @@ export default function HomePage() {
       </section>
 
       {/* FREQUENTLY ASKED QUESTIONS */}
-      <section className="py-12 sm:py-14 px-4 sm:px-6 lg:px-8 border-b border-[#2b313a] bg-[#07090b]">
-        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
-          <div className="text-center space-y-1.5">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Frequently Asked Questions</h2>
-            <p className="text-xs text-[#848e9c]">Everything you need to know about trading options and yield vaults.</p>
+      <section className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 bg-[#f8fafc]">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
+            <p className="text-xs text-slate-500">Everything you need to know about trading options and yield vaults.</p>
           </div>
 
           <div className="space-y-3">
@@ -314,9 +320,9 @@ export default function HomePage() {
                 a: "Your capital is separated into 3 dedicated balances (Holding, Earn Vaults, Options Trading). You can transfer funds instantly between accounts with zero fees.",
               },
             ].map((faq, idx) => (
-              <div key={idx} className="bg-[#181a20] border border-[#2b313a] rounded-lg p-4 space-y-1.5">
-                <h4 className="text-xs sm:text-sm font-bold text-white font-sans">{faq.q}</h4>
-                <p className="text-[11px] sm:text-xs text-[#848e9c] leading-relaxed font-sans">{faq.a}</p>
+              <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5 space-y-2 shadow-xs">
+                <h4 className="text-sm font-bold text-slate-900 font-sans">{faq.q}</h4>
+                <p className="text-xs text-slate-600 leading-relaxed font-sans">{faq.a}</p>
               </div>
             ))}
           </div>

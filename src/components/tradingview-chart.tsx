@@ -6,12 +6,14 @@ interface TradingViewChartProps {
   symbol?: string;
   height?: number | string;
   interval?: string;
+  theme?: "light" | "dark";
 }
 
 function TradingViewChart({
   symbol = "BTCUSDT",
   height,
   interval = "1",
+  theme = "light",
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,12 +41,12 @@ function TradingViewChart({
       symbol: tvSymbol,
       interval: interval,
       timezone: "Etc/UTC",
-      theme: "dark",
+      theme: theme,
       style: "1", // 1 = Japanese Candlesticks
       locale: "en",
       enable_publishing: false,
-      backgroundColor: "#090d16",
-      gridColor: "rgba(30, 41, 59, 0.4)",
+      backgroundColor: theme === "dark" ? "#090d16" : "#ffffff",
+      gridColor: theme === "dark" ? "rgba(30, 41, 59, 0.4)" : "rgba(226, 232, 240, 0.8)",
       hide_side_toolbar: false,
       allow_symbol_change: true,
       show_popup_button: true,
@@ -56,14 +58,14 @@ function TradingViewChart({
     });
 
     containerRef.current.appendChild(script);
-  }, [tvSymbol, interval]);
+  }, [tvSymbol, interval, theme]);
 
   // Determine dynamic container style
   const containerStyle = typeof height === "number" ? { height: `${height}px` } : undefined;
 
   return (
     <div
-      className={`w-full rounded-2xl overflow-hidden border border-[#1e2638] bg-[#090d16] shadow-2xl relative ${
+      className={`w-full rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-lg relative ${
         !height ? "h-[360px] sm:h-[480px] lg:h-[540px]" : ""
       }`}
       style={containerStyle}
