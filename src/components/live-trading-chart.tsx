@@ -2,7 +2,7 @@
 
 import React from "react";
 import TradingViewChart from "./tradingview-chart";
-import { ShieldCheck, Timer, TrendingUp, TrendingDown } from "lucide-react";
+import { ShieldCheck, Timer, TrendingUp, TrendingDown, Target, Zap } from "lucide-react";
 
 interface LiveTradingChartProps {
   symbol: string;
@@ -27,7 +27,7 @@ export default function LiveTradingChart({
   const strike = Number(activeStrikePrice || 0);
   const isCall = activeDirection === "CALL";
 
-  // Helper to format currency price depending on coin scale
+  // Price formatting helper for micro-coins (XRP/DOGE) vs majors (BTC/ETH/SOL/BNB)
   const formatPrice = (val: number) => {
     if (!val || isNaN(val)) return "0.00";
     if (val < 10) {
@@ -36,21 +36,21 @@ export default function LiveTradingChart({
     return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  // Dynamic percentage offset calculation for any asset scale
-  // pctDiff measures percentage deviation from entry strike
-  let offsetPct = 50;
-  if (hasActiveOrder && strike > 0 && livePrice > 0) {
-    const pctDiff = ((livePrice - strike) / strike) * 100;
-    // Map -0.5% .. +0.5% deviation to 20% .. 80% container height
-    offsetPct = Math.max(18, Math.min(82, 50 - pctDiff * 60));
-  }
-
   const formattedLivePrice = formatPrice(livePrice);
   const formattedStrikePrice = formatPrice(strike);
 
+  // Price difference calculations
+  const rawDiff = livePrice - strike;
+  const absDiff = Math.abs(rawDiff);
+  const pctDiff = strike > 0 ? (rawDiff / strike) * 100 : 0;
+  const formattedDiff = formatPrice(absDiff);
+  const formattedPct = Math.abs(pctDiff).toFixed(3);
+
+  const isInMoney = liveStatus?.label.includes("IN THE") ?? false;
+
   return (
     <div className="w-full relative bg-[#090d16] rounded-2xl border border-[#1e2638] p-3 shadow-2xl space-y-2 select-none">
-      {/* Top Header Bar */}
+      {/* Top Asset & Feed Header Bar */}
       <div className="flex items-center justify-between gap-3 px-1 py-1 text-xs">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-[#121722] border border-[#1e2638] px-3 py-1.5 rounded-xl font-mono">
@@ -65,81 +65,81 @@ export default function LiveTradingChart({
           </div>
         </div>
 
-        {/* Live Active Trade Badge Overlay Header */}
         {hasActiveOrder && (
-          <div className="flex items-center gap-2 font-mono">
-            <span
-              className={`px-2.5 py-1 rounded-lg border font-bold text-xs flex items-center gap-1.5 shadow-lg ${
-                isCall
-                  ? "bg-[#0ecb81]/15 text-[#0ecb81] border-[#0ecb81]/40"
-                  : "bg-[#f6465d]/15 text-[#f6465d] border-[#f6465d]/40"
-              }`}
-            >
-              {isCall ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-              <span>
-                {activeDirection} ENTRY @ ${formattedStrikePrice}
-              </span>
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <span className="px-2.5 py-1 rounded-lg bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 font-bold flex items-center gap-1.5 shadow">
+              <Timer className="w-3.5 h-3.5 animate-spin" />
+              <span>EXPIRY: {remainingTimer || "Settling..."}</span>
             </span>
-
-            {remainingTimer && (
-              <span className="px-2.5 py-1 rounded-lg bg-[#f0b90b]/10 text-[#f0b90b] border border-[#f0b90b]/30 font-bold text-xs flex items-center gap-1">
-                <Timer className="w-3.5 h-3.5 animate-spin" />
-                <span>{remainingTimer}</span>
-              </span>
-            )}
           </div>
         )}
       </div>
 
-      {/* Relative Canvas Container */}
-      <div className="relative w-full">
-        {/* Main Official Binance TradingView Chart Embed */}
-        <TradingViewChart symbol={symbol} height={height} />
-
-        {/* Chart Order Strike Line & Badge Marker Overlay */}
-        {hasActiveOrder && (
-          <div
-            className="absolute left-0 right-0 z-20 pointer-events-none transition-all duration-300 flex items-center"
-            style={{ top: `${offsetPct}%` }}
-          >
-            {/* Left Order Side Tag */}
-            <div
-              className={`px-2 py-0.5 text-[10px] font-mono font-black uppercase rounded-r shadow-lg ${
+      {/* Active Position Institutional Control Bar */}
+      {hasActiveOrder && (
+        <div className="bg-[#12161f] border border-[#263044] rounded-xl p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 font-mono text-xs shadow-lg animate-in fade-in">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`px-3 py-1 rounded-lg font-black text-xs flex items-center gap-1.5 shadow ${
                 isCall ? "bg-[#0ecb81] text-[#0b0e11]" : "bg-[#f6465d] text-white"
               }`}
             >
-              {activeDirection}
+              {isCall ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+              <span>{activeDirection} CONTRACT</span>
+            </span>
+
+            <div className="bg-[#181e2a] px-3 py-1 rounded-lg border border-[#263044] text-slate-300">
+              <span className="text-[#848e9c] text-[10px] uppercase block font-sans">Strike Rate</span>
+              <span className="font-bold text-white">${formattedStrikePrice}</span>
             </div>
 
-            {/* Center Glowing Dashed Strike Line */}
-            <div
-              className={`w-full border-b-2 border-dashed ${
-                isCall
-                  ? "border-[#0ecb81] drop-shadow-[0_0_8px_rgba(14,203,129,0.8)]"
-                  : "border-[#f6465d] drop-shadow-[0_0_8px_rgba(246,70,93,0.8)]"
-              }`}
-            />
+            <div className="bg-[#181e2a] px-3 py-1 rounded-lg border border-[#263044] text-slate-300">
+              <span className="text-[#848e9c] text-[10px] uppercase block font-sans">Live Spot</span>
+              <span className="font-bold text-white">${formattedLivePrice}</span>
+            </div>
 
-            {/* Floating Right Order Pin Badge */}
-            <div
-              className={`absolute right-3 px-3 py-1.5 rounded-lg shadow-2xl font-mono text-xs font-black flex items-center gap-2 border pointer-events-auto ${
-                isCall
-                  ? "bg-[#0ecb81] text-[#0b0e11] border-emerald-300"
-                  : "bg-[#f6465d] text-white border-rose-300"
+            <div className="bg-[#181e2a] px-3 py-1 rounded-lg border border-[#263044] text-slate-300">
+              <span className="text-[#848e9c] text-[10px] uppercase block font-sans">Price Gap</span>
+              <span className={`font-bold ${rawDiff >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"}`}>
+                {rawDiff >= 0 ? "+" : "-"}${formattedDiff} ({formattedPct}%)
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-3 py-1.5 rounded-lg border font-black text-xs flex items-center gap-1.5 shadow-md ${
+                isInMoney
+                  ? "bg-[#0ecb81]/15 text-[#0ecb81] border-[#0ecb81]/40"
+                  : "bg-[#f6465d]/15 text-[#f6465d] border-[#f6465d]/40"
               }`}
             >
-              <span>STRIKE RATE: ${formattedStrikePrice}</span>
-              {liveStatus && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                    liveStatus.label.includes("IN THE")
-                      ? "bg-[#0b0e11] text-[#0ecb81] border border-[#0ecb81]/40"
-                      : "bg-[#0b0e11] text-[#f6465d] border border-[#f6465d]/40"
-                  }`}
-                >
-                  {liveStatus.label.includes("IN THE") ? "▲ IN MONEY" : "▼ OUT MONEY"}
-                </span>
-              )}
+              <Zap className="w-3.5 h-3.5 animate-bounce" />
+              <span>{isInMoney ? "IN THE MONEY ▲ (+75%)" : "OUT OF THE MONEY ▼"}</span>
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Main TradingView Canvas Area */}
+      <div className="relative w-full">
+        <TradingViewChart symbol={symbol} height={height} />
+
+        {/* Floating Active Strike Badge Badge Pin Overlay inside chart canvas top-right */}
+        {hasActiveOrder && (
+          <div className="absolute top-3 right-3 z-20 pointer-events-none font-mono text-xs">
+            <div
+              className={`px-3 py-1.5 rounded-lg shadow-2xl border backdrop-blur-md flex items-center gap-2 pointer-events-auto ${
+                isCall
+                  ? "bg-[#0ecb81]/90 text-[#0b0e11] border-emerald-300"
+                  : "bg-[#f6465d]/90 text-white border-rose-300"
+              }`}
+            >
+              <Target className="w-4 h-4" />
+              <div>
+                <span className="text-[10px] block opacity-80 font-sans uppercase font-bold">Entry Strike</span>
+                <span className="font-black text-sm">${formattedStrikePrice}</span>
+              </div>
             </div>
           </div>
         )}
