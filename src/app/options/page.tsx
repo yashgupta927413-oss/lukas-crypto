@@ -501,22 +501,40 @@ export default function OptionsPage() {
               </div>
 
               {/* Stake Input */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="text-slate-500 font-sans font-bold">Stake Amount (USDT)</label>
-                  <span className="text-slate-400 font-mono">Bal: ${personalBalance.toFixed(2)}</span>
+                  <label className="text-slate-700 font-sans font-bold">Stake Amount (USDT)</label>
+                  <span className="text-slate-500 font-mono">Bal: ${personalBalance.toFixed(2)}</span>
                 </div>
 
                 {/* Quick Percentage Buttons */}
-                <div className="grid grid-cols-4 gap-1.5 font-mono text-xs mb-1.5">
+                <div className="grid grid-cols-4 gap-1.5 font-mono text-xs">
                   {[25, 50, 75, 100].map((pct) => (
                     <button
                       key={pct}
                       type="button"
                       onClick={() => setStakePercentage(pct)}
-                      className="py-1 rounded-md border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-blue-600 transition-colors font-bold"
+                      className="py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-blue-600 hover:bg-blue-50/50 transition-all font-bold text-[11px]"
                     >
                       {pct}%
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick Fixed Amount Presets */}
+                <div className="grid grid-cols-6 gap-1 font-mono text-[10px]">
+                  {[25, 50, 100, 250, 500, 1000].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setStakeAmount(amt.toString())}
+                      className={`py-1 rounded-md border text-center font-bold transition-all ${
+                        stakeAmount === amt.toString()
+                          ? "bg-blue-600 text-white border-blue-600 shadow-2xs"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-400"
+                      }`}
+                    >
+                      ${amt}
                     </button>
                   ))}
                 </div>
@@ -526,22 +544,26 @@ export default function OptionsPage() {
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="100.00"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-slate-900 outline-none focus:border-blue-600 focus:bg-white transition-colors"
                 />
               </div>
 
-              {/* Summary */}
+              {/* Institutional Risk / Reward Metrics */}
               <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs font-mono">
                 <div className="flex justify-between text-slate-500">
-                  <span>Stake Amount:</span>
+                  <span>Contract Stake:</span>
                   <span className="text-slate-900 font-bold">${parseFloat(stakeAmount) || 0}</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
-                  <span>Est. Profit ({winPayoutRate}%):</span>
+                  <span>Net Return (+{winPayoutRate}%):</span>
                   <span className="text-emerald-600 font-bold">+${((parseFloat(stakeAmount) || 0) * (winPayoutRate / 100)).toFixed(2)}</span>
                 </div>
+                <div className="flex justify-between text-slate-500 text-[11px]">
+                  <span>Payout Multiplier:</span>
+                  <span className="text-blue-600 font-bold">1.75x</span>
+                </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between text-xs font-bold">
-                  <span className="text-slate-700">Total Payout:</span>
+                  <span className="text-slate-800">Total Payout:</span>
                   <span className="text-emerald-600 font-black">${calculatedPayout.toFixed(2)}</span>
                 </div>
               </div>

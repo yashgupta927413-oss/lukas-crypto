@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Zap,
+  Lock,
 } from "lucide-react";
 import WalletTransferModal from "./wallet-transfer-modal";
 import BrandLogo from "./brand-logo";
@@ -88,8 +90,8 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Markets", href: "/" },
-    { name: "Trade Options", href: "/options" },
-    { name: "Earn Vaults", href: "/bots" },
+    { name: "Options Trading", href: "/options" },
+    { name: "Yield Vaults", href: "/bots" },
     { name: "Portfolio", href: "/dashboard" },
   ];
 
@@ -100,44 +102,58 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
-      {/* Top Spot Ticker Tape */}
-      <div className="border-b border-slate-200/80 bg-slate-50 text-[11px] font-mono py-1 px-4 sm:px-8">
+      {/* Institutional Ticker Tape */}
+      <div className="border-b border-slate-200/80 bg-slate-50 text-[11px] font-mono py-1.5 px-4 sm:px-8 select-none">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-6 overflow-x-auto scrollbar-none text-slate-500">
           <div className="flex items-center gap-6 shrink-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-sans border-r border-slate-200 pr-3">
+              SPOT INDEX
+            </span>
             {Object.entries(prices).map(([sym, val]) => (
               <div key={sym} className="flex items-center gap-2">
                 <span className="font-sans font-bold text-slate-800">{sym.replace("USDT", "/USDT")}</span>
-                <span className="text-slate-900 font-bold">${val.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                <span className={`font-bold ${val.change24h >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                  {val.change24h >= 0 ? "+" : ""}{val.change24h}%
+                <span className="text-slate-900 font-bold">${val.price < 10 ? val.price.toFixed(4) : val.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className={`font-bold text-[10px] ${val.change24h >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                  {val.change24h >= 0 ? "▲ +" : "▼ "}{val.change24h}%
                 </span>
               </div>
             ))}
           </div>
-          <div className="hidden lg:flex items-center gap-2 text-slate-500 text-[11px] font-sans">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-            <span>Binance Market Spot Index</span>
+
+          <div className="hidden lg:flex items-center gap-5 text-slate-500 text-[11px] font-sans shrink-0">
+            <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-slate-600">
+              <Zap className="w-3 h-3 text-amber-500" />
+              <span>24H VOL: $18.42M</span>
+            </div>
+            <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold text-emerald-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>ENGINE: 99.99% SLA</span>
+            </div>
+            <div className="flex items-center gap-1 text-slate-500 text-[10px] border-l border-slate-200 pl-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+              <span>COLD STORAGE SECURED</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Navbar */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-15">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <BrandLogo size="sm" textColor="text-slate-900" />
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-7">
+          <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-xs font-bold transition-colors py-4 border-b-2 ${
+                  className={`text-xs font-bold transition-all py-5 border-b-2 ${
                     isActive
-                      ? "text-blue-600 border-blue-600 font-bold"
+                      ? "text-blue-600 border-blue-600 font-black"
                       : "text-slate-600 border-transparent hover:text-slate-900"
                   }`}
                 >
@@ -153,47 +169,60 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
-                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3 py-1.5 rounded-lg text-xs transition-colors shadow-xs"
+                  className="flex items-center gap-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs transition-all shadow-2xs active:scale-[0.98]"
                 >
-                  <Wallet className="w-4 h-4 text-blue-600" />
+                  <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
+                    <Wallet className="w-3.5 h-3.5" />
+                  </div>
                   <div className="text-left font-mono">
-                    <span className="text-[9px] text-slate-500 block font-sans leading-none uppercase font-bold">Total Portfolio</span>
-                    <span className="text-slate-900 font-bold">${totalBalance.toFixed(2)}</span>
+                    <span className="text-[9px] text-slate-400 block font-sans leading-none uppercase font-bold">Total Net Worth</span>
+                    <span className="text-slate-900 font-black text-xs">${totalBalance.toFixed(2)}</span>
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
                 </button>
 
                 {isWalletDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xl space-y-3 z-50 animate-in zoom-in-95">
-                    <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                  <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl space-y-3 z-50 animate-in zoom-in-95 font-sans">
+                    <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
                       <div>
-                        <span className="text-[10px] text-slate-400 font-mono block uppercase">Account</span>
-                        <span className="text-xs font-bold text-slate-900 truncate max-w-[160px] block">
+                        <span className="text-[10px] text-slate-400 font-mono block uppercase font-bold">Authenticated Account</span>
+                        <span className="text-xs font-bold text-slate-900 truncate max-w-[180px] block font-mono">
                           {session.user?.email}
                         </span>
                       </div>
                       {(session.user as any)?.role === "ADMIN" && (
                         <Link
                           href="/admin"
-                          className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-200"
+                          className="text-[10px] font-black bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full border border-blue-200 uppercase tracking-wider"
                         >
                           ADMIN
                         </Link>
                       )}
                     </div>
 
-                    <div className="space-y-1.5 text-xs font-mono">
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-200/80">
-                        <span className="text-slate-600 font-sans">Holding Wallet</span>
-                        <span className="text-slate-900 font-bold">${Number(wallets.holdingBalance).toFixed(2)}</span>
+                    <div className="space-y-2 text-xs font-mono">
+                      <div className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <div>
+                          <span className="text-slate-700 font-sans font-bold block text-[11px]">Holding Wallet</span>
+                          <span className="text-[10px] text-slate-400 font-sans">Unencumbered Fiat/Crypto</span>
+                        </div>
+                        <span className="text-slate-900 font-bold text-xs">${Number(wallets.holdingBalance).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-200/80">
-                        <span className="text-slate-600 font-sans">Earn Vaults</span>
-                        <span className="text-amber-600 font-bold">${Number(wallets.botBalance).toFixed(2)}</span>
+
+                      <div className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <div>
+                          <span className="text-slate-700 font-sans font-bold block text-[11px]">Earn Vaults</span>
+                          <span className="text-[10px] text-amber-600 font-sans">Structured Staking</span>
+                        </div>
+                        <span className="text-amber-700 font-bold text-xs">${Number(wallets.botBalance).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-200/80">
-                        <span className="text-slate-600 font-sans">Options Trading</span>
-                        <span className="text-emerald-600 font-bold">${Number(wallets.personalTradingBalance).toFixed(2)}</span>
+
+                      <div className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <div>
+                          <span className="text-slate-700 font-sans font-bold block text-[11px]">Options Desk</span>
+                          <span className="text-[10px] text-emerald-600 font-sans">Binary Derivatives</span>
+                        </div>
+                        <span className="text-emerald-700 font-bold text-xs">${Number(wallets.personalTradingBalance).toFixed(2)}</span>
                       </div>
                     </div>
 
@@ -202,23 +231,23 @@ export default function Navbar() {
                         setIsWalletDropdownOpen(false);
                         setIsTransferModalOpen(true);
                       }}
-                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs active:scale-[0.98]"
                     >
-                      <ArrowRightLeft className="w-3.5 h-3.5" />
-                      Transfer Funds
+                      <ArrowRightLeft className="w-4 h-4" />
+                      Instant Transfer Between Wallets
                     </button>
 
-                    <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                    <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs font-bold">
                       <Link
                         href="/dashboard"
-                        className="text-blue-600 hover:underline font-bold"
+                        className="text-blue-600 hover:underline flex items-center gap-1"
                         onClick={() => setIsWalletDropdownOpen(false)}
                       >
-                        Portfolio →
+                        Portfolio Overview →
                       </Link>
                       <button
                         onClick={() => signOut()}
-                        className="text-rose-600 hover:underline font-semibold flex items-center gap-1"
+                        className="text-rose-600 hover:underline flex items-center gap-1 font-semibold"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -228,18 +257,18 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <Link
                   href="/login"
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors"
+                  className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors"
                 >
                   Log In
                 </Link>
                 <Link
                   href="/register"
-                  className="px-3.5 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-xs"
+                  className="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-xs active:scale-[0.98]"
                 >
-                  Register
+                  Register Account
                 </Link>
               </div>
             )}
@@ -247,7 +276,7 @@ export default function Navbar() {
             {/* Mobile Hamburger Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-1.5 text-slate-700 hover:text-slate-900 rounded-lg border border-slate-200"
+              className="md:hidden p-2 text-slate-700 hover:text-slate-900 rounded-xl border border-slate-200 bg-slate-50"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -257,7 +286,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl">
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl font-sans">
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -266,8 +295,8 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-colors ${
-                    isActive ? "bg-blue-50 text-blue-600" : "text-slate-700 hover:bg-slate-100"
+                  className={`px-3.5 py-3 rounded-xl text-sm font-bold transition-colors ${
+                    isActive ? "bg-blue-50 text-blue-600 font-black" : "text-slate-700 hover:bg-slate-100"
                   }`}
                 >
                   {link.name}
