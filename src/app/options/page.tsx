@@ -227,7 +227,7 @@ export default function OptionsPage() {
   };
 
   const activePendingTrades = trades.filter((t) => t.status === "PENDING");
-  const latestPendingTrade = activePendingTrades[0];
+  const latestPendingTrade = activePendingTrades.find((t) => t.symbol === selectedAsset) || activePendingTrades[0];
   const isUp = price24hChange >= 0;
 
   return (
