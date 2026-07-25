@@ -227,7 +227,8 @@ export default function OptionsPage() {
   };
 
   const activePendingTrades = trades.filter((t) => t.status === "PENDING");
-  const latestPendingTrade = activePendingTrades.find((t) => t.symbol === selectedAsset) || activePendingTrades[0];
+  const latestPendingTrade = activePendingTrades[0];
+  const activeTradeForSelectedAsset = activePendingTrades.find((t) => t.symbol === selectedAsset) || null;
   const isUp = price24hChange >= 0;
 
   return (
@@ -322,10 +323,10 @@ export default function OptionsPage() {
             <LiveTradingChart
               symbol={selectedAsset}
               livePrice={livePrice}
-              activeStrikePrice={latestPendingTrade ? Number(latestPendingTrade.strikePrice) : null}
-              activeDirection={latestPendingTrade ? latestPendingTrade.direction : null}
-              remainingTimer={latestPendingTrade ? formatTimer(latestPendingTrade.expiresAt) : null}
-              liveStatus={latestPendingTrade ? getTradeLiveStatus(latestPendingTrade) : null}
+              activeStrikePrice={activeTradeForSelectedAsset ? Number(activeTradeForSelectedAsset.strikePrice) : null}
+              activeDirection={activeTradeForSelectedAsset ? activeTradeForSelectedAsset.direction : null}
+              remainingTimer={activeTradeForSelectedAsset ? formatTimer(activeTradeForSelectedAsset.expiresAt) : null}
+              liveStatus={activeTradeForSelectedAsset ? getTradeLiveStatus(activeTradeForSelectedAsset) : null}
             />
 
             {/* Bottom Tabs: Positions, History, Order Book */}
